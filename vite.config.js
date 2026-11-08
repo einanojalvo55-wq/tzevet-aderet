@@ -5,5 +5,6 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 // SINGLE=1 builds one self-contained HTML file (used for the phone preview link)
 export default defineConfig({
   plugins: [react(), ...(process.env.SINGLE ? [viteSingleFile()] : [])],
+  base: './',
   build: { outDir: process.env.SINGLE ? 'dist-single' : 'dist' },
 })

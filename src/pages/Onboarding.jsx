@@ -8,23 +8,25 @@ export default function Onboarding({ initial, onDone, onCancel }) {
   const [firstName, setFirst] = useState(initial?.firstName || '')
   const [lastName, setLast] = useState(initial?.lastName || '')
   const [tribe, setTribe] = useState(initial?.tribe || '')
+  const [phone, setPhone] = useState(initial?.phone || '')
   const [tried, setTried] = useState(false)
   const [{ tribes: TRIBES }] = useSettings()
-  const ok = firstName.trim() && lastName.trim() && tribe
+  const phoneOk = phone.replace(/\D/g, '').length >= 9
+  const ok = firstName.trim() && lastName.trim() && tribe && phoneOk
 
   function submit(e) {
     e.preventDefault()
     setTried(true)
     if (!ok) return
-    onDone({ firstName: firstName.trim(), lastName: lastName.trim(), tribe, role: initial?.role || 'member', createdAt: initial?.createdAt || Date.now() })
+    onDone({ firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), tribe, role: initial?.role || 'member', createdAt: initial?.createdAt || Date.now() })
   }
 
   return (
     <div className="page-in pt-safe mx-auto flex min-h-full max-w-md flex-col px-5 pb-10">
       <div className="flex flex-col items-center pt-12 text-center">
         <Logo className="h-28 w-28 rounded-[28px] shadow-xl" />
-        <h1 className="mt-5 text-3xl font-extrabold">{initial ? 'עריכת פרופיל' : 'ברוכים הבאים לצוות אדרת'}</h1>
-        {!initial && <p className="mt-2 text-slate-500 dark:text-slate-400">רק כמה פרטים ונכנסים</p>}
+        <h1 className="mt-5 text-3xl font-extrabold">{initial?.phone ? 'עריכת פרופיל' : 'ברוכים הבאים לצוות אדרת'}</h1>
+        {!initial?.phone && <p className="mt-2 text-slate-500 dark:text-slate-400">רק כמה פרטים ונכנסים</p>}
       </div>
 
       <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl bg-white p-5 shadow-card dark:bg-navy-900">
@@ -35,6 +37,10 @@ export default function Onboarding({ initial, onDone, onCancel }) {
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">שם משפחה</span>
           <input className={field} value={lastName} onChange={(e) => setLast(e.target.value)} autoComplete="family-name" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">מספר טלפון</span>
+          <input className={field} value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" dir="ltr" style={{ textAlign: 'right' }} />
         </label>
         <div>
           <span className="mb-1.5 block text-sm font-semibold">איזה שבט אתה מדריך?</span>
@@ -47,9 +53,9 @@ export default function Onboarding({ initial, onDone, onCancel }) {
             ))}
           </div>
         </div>
-        {tried && !ok && <p className="text-sm font-medium text-rose-600">צריך למלא שם פרטי, שם משפחה ולבחור שבט</p>}
+        {tried && !ok && <p className="text-sm font-medium text-rose-600">צריך למלא שם פרטי, שם משפחה, מספר טלפון תקין ולבחור שבט</p>}
         <button className="w-full rounded-2xl bg-accent-500 py-4 text-lg font-bold text-white shadow-md transition active:scale-[.98]">
-          {initial ? 'שמירה' : 'יצירת פרופיל'}
+          {initial?.phone ? 'שמירה' : 'יצירת פרופיל'}
         </button>
         {onCancel && <button type="button" onClick={onCancel} className="w-full py-2 text-sm font-semibold text-slate-500">ביטול</button>}
       </form>

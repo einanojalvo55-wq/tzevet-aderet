@@ -6,7 +6,7 @@ export default function Tile({ tile }) {
   return (
     <Link
       to={`/${tile.id}`}
-      className={`relative flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 transition active:scale-[.97] dark:bg-navy-900 dark:ring-white/5 ${tile.wide ? 'col-span-2 flex-row items-center' : ''}`}
+      className={`relative flex gap-3 rounded-3xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 transition active:scale-[.97] dark:bg-navy-900 dark:ring-white/5 ${tile.wide ? 'col-span-2 flex-row items-center' : 'flex-col'}`}
     >
       <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${tone[tile.color]}`}>
         <Icon name={tile.icon} size={24} />

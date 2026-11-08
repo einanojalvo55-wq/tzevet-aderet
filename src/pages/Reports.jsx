@@ -7,6 +7,8 @@ import Chips from '../components/Chips'
 import { useReports, useAdmin, fullName, notify } from '../data/hooks'
 import { timeAgo } from '../data/dates'
 import { newId } from '../data/store'
+import { online, saveImage } from '../firebase'
+import StoredImage from '../components/StoredImage'
 
 export const REPORT_TYPES = {
   fault: { label: 'תקלה בסניף', icon: 'Wrench', hint: 'משהו שבור, נורה, מזגן' },
@@ -28,8 +30,12 @@ export default function Reports({ profile }) {
     .filter((r) => filter === 'all' || (filter === 'open' ? r.status !== 'done' : r.status === 'done'))
     .sort((a, b) => (b.urgent && b.status !== 'done') - (a.urgent && a.status !== 'done') || b.createdAt - a.createdAt)
 
-  const send = (r) => {
-    setList((l) => [{ ...r, id: newId(), by: me, status: 'new', createdAt: Date.now() }, ...l])
+  const send = async (r) => {
+    const id = newId()
+    if (online && r.image) {
+      try { await saveImage(id, r.image); r = { ...r, image: `img:${id}` } } catch { alert('שמירת התמונה נכשלה, הדיווח יישלח בלי תמונה'); r = { ...r, image: null } }
+    }
+    setList((l) => [{ ...r, id, by: me, status: 'new', createdAt: Date.now() }, ...l])
     notify({ text: `${r.urgent ? '🚨 דחוף! ' : ''}${REPORT_TYPES[r.type].label} מ${me}: ${r.text.slice(0, 60)}`, kind: 'report', to: 'admins', link: '/reports' })
     setWriting(false)
   }
@@ -57,7 +63,7 @@ export default function Reports({ profile }) {
                 <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${statusCls[r.status]}`}>{STATUS[r.status]}</span>
               </div>
               <p className="mt-2 whitespace-pre-line text-[15px] text-slate-700 dark:text-slate-300">{r.text}</p>
-              {r.image && <button onClick={() => setPhoto(r.image)} className="mt-2 block"><img src={r.image} alt="" className="h-28 rounded-2xl object-cover" /></button>}
+              {r.image && <StoredImage src={r.image} onOpen={setPhoto} className="mt-2 h-28 rounded-2xl object-cover" />}
               {isAdmin && (
                 <div className="mt-3 grid grid-cols-3 gap-1.5">
                   {Object.entries(STATUS).map(([k, l]) => (

@@ -40,6 +40,8 @@ export default function Home({ profile }) {
     { id: 'speaker', title: 'רמקול', icon: 'Speaker', color: 'green', sub: sp.label, dot: sp.color, badge: pendingLoans },
     { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין דיווחים פתוחים' },
     { id: 'contacts', title: 'מספרים חשובים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
+    { id: 'links', title: 'קישורים חשובים', icon: 'Link', color: 'sky', sub: 'טפסים, אתרים ומסמכים' },
+    { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים והטלפונים' },
     { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'כניסה עם סיסמה', locked: !isAdmin, wide: true },
   ]
 

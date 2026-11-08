@@ -6,5 +6,6 @@ export const tone = {
   green:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   orange: 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300',
   rose:   'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+  sky:    'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
   slate:  'bg-slate-200 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
 }

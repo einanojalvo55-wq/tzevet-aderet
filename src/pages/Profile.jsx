@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Icon from '../components/Icon'
 import Onboarding from './Onboarding'
-import { useAdmin, useNotifPrefs, NOTIF_KINDS, showSystemNotification } from '../data/hooks'
+import { useAdmin, useNotifPrefs, NOTIF_KINDS, showSystemNotification, notify, fullName } from '../data/hooks'
+import { online, enablePush, saveUser } from '../firebase'
 
 const roleName = { owner: 'מנהל ראשי', admin: 'מנהל', member: 'מדריך' }
 
@@ -21,10 +22,16 @@ export default function Profile({ profile, onSave, onReset }) {
 
   async function enable() {
     if (!('Notification' in window)) return setMsg('בטלפון הזה צריך קודם להוסיף את האפליקציה למסך הבית')
-    const r = await Notification.requestPermission()
-    setMsg(r === 'granted' ? 'ההתראות הופעלו ✓' : 'ההתראות לא אושרו. אפשר לשנות בהגדרות הטלפון')
+    try {
+      const r = await enablePush()
+      setMsg(r.startsWith('granted') ? 'ההתראות הופעלו ✓' : 'ההתראות לא אושרו. אפשר לשנות בהגדרות הטלפון')
+    } catch (e) { setMsg('לא הצלחנו להפעיל התראות: ' + (e.message || e)) }
   }
   async function test() {
+    if (online) {
+      notify({ text: 'זו התראת בדיקה. אם רואים אותה, הכול עובד 🎉', kind: 'test', to: fullName(profile), link: '/profile' })
+      return setMsg('נשלחה התראת בדיקה מהשרת. היא אמורה להגיע תוך כמה שניות')
+    }
     const ok = await showSystemNotification('זו התראת בדיקה. אם רואים אותה, הכול עובד 🎉')
     setMsg(ok ? 'נשלחה התראת בדיקה' : 'לא הצלחנו להציג התראה. צריך קודם להפעיל התראות')
   }
@@ -35,6 +42,7 @@ export default function Profile({ profile, onSave, onReset }) {
       <div className="flex flex-col items-center rounded-3xl bg-white p-6 text-center shadow-card dark:bg-navy-900">
         <div className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-navy-500 to-navy-800 text-2xl font-extrabold text-white">{initials}</div>
         <div className="mt-3 text-xl font-extrabold">{profile.firstName} {profile.lastName}</div>
+        {profile.phone && <div className="text-sm text-slate-500" dir="ltr">{profile.phone}</div>}
         <div className="mt-1 flex gap-2 text-sm">
           <span className="rounded-full bg-navy-100 px-3 py-1 font-semibold text-navy-700 dark:bg-white/10 dark:text-white">{isAdmin ? 'מנהל' : roleName[profile.role]}</span>
           <span className="rounded-full bg-accent-500/15 px-3 py-1 font-semibold text-accent-600 dark:text-accent-400">{profile.tribe}</span>
@@ -52,7 +60,7 @@ export default function Profile({ profile, onSave, onReset }) {
           const locked = k === 'important'
           const on = locked || prefs[k] !== false
           return (
-            <button key={k} disabled={locked} onClick={() => setPrefs({ ...prefs, [k]: !on })} className="flex w-full items-center gap-3 border-t border-slate-100 px-5 py-3.5 text-right first:border-t-0 dark:border-white/5">
+            <button key={k} disabled={locked} onClick={() => { const next = { ...prefs, [k]: !on }; setPrefs(next); saveUser({ prefs: next }) }} className="flex w-full items-center gap-3 border-t border-slate-100 px-5 py-3.5 text-right first:border-t-0 dark:border-white/5">
               <span className="flex-1 font-semibold">{label}{locked && <span className="mr-1 text-xs font-normal text-slate-400">(תמיד פועל)</span>}</span><Toggle on={on} />
             </button>
           )
