@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import Icon from '../components/Icon'
 import Onboarding from './Onboarding'
+import { useAdmin } from '../data/hooks'
 
 const roleName = { owner: 'מנהל ראשי', admin: 'מנהל', member: 'מדריך' }
 
 export default function Profile({ profile, onSave, onReset }) {
   const [editing, setEditing] = useState(false)
+  const [isAdmin] = useAdmin()
   if (editing) return <Onboarding initial={profile} onDone={(p) => { onSave(p); setEditing(false) }} onCancel={() => setEditing(false)} />
 
   const initials = profile.firstName[0] + (profile.lastName[0] || '')
@@ -16,7 +18,7 @@ export default function Profile({ profile, onSave, onReset }) {
         <div className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-navy-500 to-navy-800 text-2xl font-extrabold text-white">{initials}</div>
         <div className="mt-3 text-xl font-extrabold">{profile.firstName} {profile.lastName}</div>
         <div className="mt-1 flex gap-2 text-sm">
-          <span className="rounded-full bg-navy-100 px-3 py-1 font-semibold text-navy-700 dark:bg-white/10 dark:text-white">{roleName[profile.role]}</span>
+          <span className="rounded-full bg-navy-100 px-3 py-1 font-semibold text-navy-700 dark:bg-white/10 dark:text-white">{isAdmin ? 'מנהל' : roleName[profile.role]}</span>
           <span className="rounded-full bg-accent-500/15 px-3 py-1 font-semibold text-accent-600 dark:text-accent-400">{profile.tribe}</span>
         </div>
       </div>

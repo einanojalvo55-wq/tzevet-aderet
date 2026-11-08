@@ -6,6 +6,8 @@ import Admin from './pages/Admin'
 import Profile from './pages/Profile'
 import Onboarding from './pages/Onboarding'
 import Placeholder from './pages/Placeholder'
+import Announcements from './pages/Announcements'
+import Contacts from './pages/Contacts'
 import { loadProfile, saveProfile, clearProfile } from './data/profile'
 
 export default function App() {
@@ -18,8 +20,8 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Home profile={profile} />} />
-        <Route path="/announcements" element={<Placeholder title="הודעות" icon="Megaphone" color="blue" stage={3} />} />
-        <Route path="/contacts" element={<Placeholder title="מספרים חשובים" icon="Phone" color="rose" stage={3} />} />
+        <Route path="/announcements" element={<Announcements profile={profile} />} />
+        <Route path="/contacts" element={<Contacts />} />
         <Route path="/events" element={<Placeholder title="אירועים" icon="CalendarDays" color="violet" stage={4} />} />
         <Route path="/speaker" element={<Placeholder title="רמקול" icon="Speaker" color="green" stage={5} />} />
         <Route path="/rooms" element={<Placeholder title="שיבוץ חדרים" icon="DoorOpen" color="teal" stage={6} />} />

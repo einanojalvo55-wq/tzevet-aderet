@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
 import Tile from '../components/Tile'
 import Logo from '../components/Logo'
-import { latestAnnouncement as a, tiles } from '../data/mock'
+import { tiles } from '../data/mock'
+import { useAnnouncements, useReadIds, useAdmin, sortAnnouncements } from '../data/hooks'
 
 function greeting() {
   const h = new Date().getHours()
@@ -13,6 +14,17 @@ function greeting() {
 }
 
 export default function Home({ profile }) {
+  const [list] = useAnnouncements()
+  const [readIds] = useReadIds()
+  const [isAdmin] = useAdmin()
+  const unread = list.filter((x) => !readIds.includes(x.id)).length
+  const a = sortAnnouncements(list)[0]
+  const live = tiles.map((t) => {
+    if (t.id === 'announcements') return { ...t, badge: unread, sub: unread ? `${unread} לא נקראו` : 'הכול נקרא' }
+    if (t.id === 'rooms') return { ...t, sub: `${profile.tribe}: חדר גדול` }
+    if (t.id === 'admin' && isAdmin) return { ...t, sub: 'מצב ניהול פעיל', locked: false }
+    return t
+  })
   return (
     <div className="page-in">
       <header className="pt-safe bg-gradient-to-b from-navy-800 to-navy-700 px-5 pb-16 text-white dark:from-navy-900 dark:to-navy-900">
@@ -26,8 +38,8 @@ export default function Home({ profile }) {
       </header>
 
       <main className="mx-auto -mt-11 max-w-md px-4 pb-28">
-        <Link to="/announcements"
-          className={`mb-4 flex items-start gap-3 rounded-3xl bg-white p-4 shadow-card ring-1 transition active:scale-[.98] dark:bg-navy-900 ${a.unread ? 'ring-2 ring-accent-500' : 'ring-slate-900/5 dark:ring-white/5'}`}>
+        {a && <Link to="/announcements"
+          className={`mb-4 flex items-start gap-3 rounded-3xl bg-white p-4 shadow-card ring-1 transition active:scale-[.98] dark:bg-navy-900 ${!readIds.includes(a.id) ? 'ring-2 ring-accent-500' : 'ring-slate-900/5 dark:ring-white/5'}`}>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-500 text-white">
             <Icon name="Megaphone" size={20} />
           </div>
@@ -36,12 +48,12 @@ export default function Home({ profile }) {
               הודעה אחרונה {a.important && <span className="rounded-full bg-accent-500/15 px-2 py-0.5">חשוב</span>}
             </div>
             <div className="mt-0.5 font-bold leading-snug">{a.title}</div>
-            <div className="mt-0.5 line-clamp-1 text-sm text-slate-500 dark:text-slate-400">{a.body}</div>
+            {a.body && <div className="mt-0.5 line-clamp-1 text-sm text-slate-500 dark:text-slate-400">{a.body}</div>}
           </div>
-        </Link>
+        </Link>}
 
         <div className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => <Tile key={t.id} tile={t.id === 'rooms' ? { ...t, sub: `${profile.tribe}: חדר גדול` } : t} />)}
+          {live.map((t) => <Tile key={t.id} tile={t} />)}
         </div>
       </main>
     </div>
