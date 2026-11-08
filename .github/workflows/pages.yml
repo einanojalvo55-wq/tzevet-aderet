@@ -1,4 +1,6 @@
-# כל שינוי שנשמר ב-GitHub עולה אוטומטית לאוויר (GitHub Pages, חינם)
+# כל שינוי שנשמר ב-GitHub עולה אוטומטית לאוויר:
+# הכתובת הראשית: tzevet-aderet.web.app (Firebase Hosting, חינם)
+# גיבוי: GitHub Pages
 name: Publish app
 on:
   push:
@@ -10,12 +12,20 @@ concurrency: { group: pages, cancel-in-progress: true }
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - run: npm ci
       - run: npm run build
+      - name: Deploy to tzevet-aderet.web.app
+        if: env.SA != ''
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@14.9.0 deploy --only hosting --project tzevet-aderet --non-interactive
       - name: Push to gh-pages
         run: |
           cd dist
