@@ -29,11 +29,11 @@ export default function Onboarding({ initial, onDone, onCancel }) {
       <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl bg-white p-5 shadow-card dark:bg-navy-900">
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">שם פרטי</span>
-          <input className={field} value={firstName} onChange={(e) => setFirst(e.target.value)} autoComplete="given-name" placeholder="למשל: עינן" />
+          <input className={field} value={firstName} onChange={(e) => setFirst(e.target.value)} autoComplete="given-name" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">שם משפחה</span>
-          <input className={field} value={lastName} onChange={(e) => setLast(e.target.value)} autoComplete="family-name" placeholder="למשל: אוחיון" />
+          <input className={field} value={lastName} onChange={(e) => setLast(e.target.value)} autoComplete="family-name" />
         </label>
         <div>
           <span className="mb-1.5 block text-sm font-semibold">איזה שבט אתה מדריך?</span>
