@@ -4,6 +4,9 @@ import Onboarding from './Onboarding'
 import { useAdmin, useNotifPrefs, NOTIF_KINDS, showSystemNotification, notify, fullName } from '../data/hooks'
 import { online, enablePush, saveUser } from '../firebase'
 
+/* global __BUILD__ */
+const VERSION = new Date(+__BUILD__).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })
+
 const roleName = { owner: 'מנהל ראשי', admin: 'מנהל', member: 'מדריך' }
 
 function Toggle({ on }) {
@@ -80,6 +83,7 @@ export default function Profile({ profile, onSave, onReset }) {
           <Icon name="LogOut" size={20} /> <span className="flex-1">יציאה</span>
         </button>
       </div>
+      <p className="mt-6 text-center text-xs text-slate-400">גרסה {VERSION}</p>
     </div>
   )
 }
