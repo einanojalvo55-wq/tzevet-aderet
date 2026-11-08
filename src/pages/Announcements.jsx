@@ -2,17 +2,9 @@ import { useEffect, useState } from 'react'
 import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import Sheet, { field, primaryBtn } from '../components/Sheet'
-import { useAnnouncements, useReadIds, useAdmin, sortAnnouncements } from '../data/hooks'
+import { useAnnouncements, useReadIds, useAdmin, sortAnnouncements, notify } from '../data/hooks'
+import { timeAgo } from '../data/dates'
 import { newId } from '../data/store'
-
-function timeAgo(ts) {
-  const m = Math.round((Date.now() - ts) / 60000)
-  if (m < 1) return 'עכשיו'
-  if (m < 60) return `לפני ${m} דק׳`
-  const h = Math.round(m / 60)
-  if (h < 24) return `לפני ${h} שע׳`
-  return new Date(ts).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' })
-}
 
 export default function Announcements({ profile }) {
   const [list, setList] = useAnnouncements()
@@ -52,6 +44,7 @@ export default function Announcements({ profile }) {
       )}
       {composing && <Composer onClose={() => setComposing(false)} onSend={(a) => {
         setList((l) => [{ ...a, id: newId(), author: `${profile.firstName} ${profile.lastName}`, createdAt: Date.now() }, ...l])
+        notify({ text: `${a.important ? '📌 ' : ''}${a.title}`, kind: a.important ? 'important' : 'announcement', link: '/announcements' })
         setComposing(false)
       }} />}
     </div>

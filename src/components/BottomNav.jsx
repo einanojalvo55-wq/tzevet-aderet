@@ -1,14 +1,18 @@
 import { NavLink } from 'react-router-dom'
 import Icon from './Icon'
+import { useNotifications, useNotifSeen, useAdmin, isForMe } from '../data/hooks'
 
-const tabs = [
-  { to: '/', label: 'בית', icon: 'Home' },
-  { to: '/events', label: 'אירועים', icon: 'CalendarDays' },
-  { to: '/notifications', label: 'התראות', icon: 'Bell', badge: 3 },
-  { to: '/profile', label: 'פרופיל', icon: 'User' },
-]
-
-export default function BottomNav() {
+export default function BottomNav({ profile }) {
+  const [list] = useNotifications()
+  const [seen] = useNotifSeen()
+  const [isAdmin] = useAdmin()
+  const unseen = list.filter((n) => n.createdAt > seen && isForMe(n, profile, isAdmin)).length
+  const tabs = [
+    { to: '/', label: 'בית', icon: 'Home' },
+    { to: '/events', label: 'אירועים', icon: 'CalendarDays' },
+    { to: '/notifications', label: 'התראות', icon: 'Bell', badge: unseen },
+    { to: '/profile', label: 'פרופיל', icon: 'User' },
+  ]
   return (
     <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-navy-950/90">
       <div className="mx-auto grid max-w-md grid-cols-4 pt-2">
@@ -17,7 +21,7 @@ export default function BottomNav() {
             className={({ isActive }) => `relative flex flex-col items-center gap-1 py-1 text-[11px] font-medium transition ${isActive ? 'text-navy-600 dark:text-accent-400' : 'text-slate-400'}`}>
             <span className="relative">
               <Icon name={t.icon} size={24} />
-              {t.badge && <span className="absolute -left-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-accent-500 ring-2 ring-white dark:ring-navy-950" />}
+              {t.badge > 0 && <span className="absolute -left-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent-500 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-navy-950">{t.badge}</span>}
             </span>
             {t.label}
           </NavLink>

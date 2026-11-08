@@ -1,11 +1,64 @@
-import { useStore } from './store'
-import { seedAnnouncements, seedContacts } from './seed'
+import { useStore, write, newId } from './store'
+import { seedAnnouncements, seedContacts, seedEvents, seedSettings, seedBookings } from './seed'
+import { loadProfile } from './profile'
 
 export const useAnnouncements = () => useStore('announcements', seedAnnouncements)
 export const useReadIds = () => useStore('readAnnouncements', [])
 export const useContacts = () => useStore('contacts', seedContacts)
 export const useAdmin = () => useStore('isAdmin', false)
+export const useSettings = () => useStore('settings', seedSettings)
+export const useEvents = () => useStore('events', seedEvents)
+export const useLoans = () => useStore('speakerLoans', [])
+export const useBookings = () => useStore('roomBookings', seedBookings)
+export const useReports = () => useStore('reports', [])
+export const useNotifications = () => useStore('notifications', [])
+export const useNotifSeen = () => useStore('notificationsSeen', 0)
+export const useNotifPrefs = () => useStore('notifPrefs', {})
+
+export const fullName = (p) => `${p.firstName} ${p.lastName}`
 
 // הודעות חשובות קודם, ואז מהחדשה לישנה
 export const sortAnnouncements = (list) =>
   [...list].sort((a, b) => (b.important - a.important) || (b.createdAt - a.createdAt))
+
+// סוגי התראות (אפשר לכבות כל סוג בפרופיל, חוץ מ"חשוב")
+export const NOTIF_KINDS = {
+  announcement: 'הודעות כלליות',
+  important: 'הודעות חשובות',
+  event: 'אירועים ותזכורות',
+  room: 'שינויים בשיבוץ חדרים',
+  speaker: 'השאלת הרמקול',
+  report: 'דיווחים',
+}
+
+// to: 'all' | 'admins' | 'tribe:<שבט>' | '<שם מלא>'
+export function isForMe(n, profile, isAdmin) {
+  if (!profile) return false
+  if (n.to === 'all') return true
+  if (n.to === 'admins') return isAdmin
+  if (n.to.startsWith('tribe:')) return n.to.slice(6) === profile.tribe
+  return n.to === fullName(profile)
+}
+
+// יוצר התראה. כרגע נשמרת במכשיר ומוצגת כהתראת מערכת אם יש הרשאה.
+// כשנחבר שרת, אותה פונקציה תשלח התראת Push לטלפונים של הצוות.
+export function notify({ text, kind, to = 'all', link = '/' }) {
+  let list = []
+  try { list = JSON.parse(localStorage.getItem('tzevet-aderet:notifications')) || [] } catch { /* */ }
+  write('notifications', [{ id: newId(), text, kind, to, link, createdAt: Date.now() }, ...list].slice(0, 200))
+  const profile = loadProfile()
+  let isAdmin = false, prefs = {}
+  try { isAdmin = JSON.parse(localStorage.getItem('tzevet-aderet:isAdmin')); prefs = JSON.parse(localStorage.getItem('tzevet-aderet:notifPrefs')) || {} } catch { /* */ }
+  if (prefs[kind] === false || !isForMe({ to }, profile, isAdmin)) return
+  showSystemNotification(text)
+}
+
+export async function showSystemNotification(text) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return false
+    const reg = await navigator.serviceWorker?.getRegistration?.()
+    if (reg) await reg.showNotification('צוות אדרת', { body: text, icon: './icon.svg', lang: 'he', dir: 'rtl' })
+    else new Notification('צוות אדרת', { body: text, lang: 'he', dir: 'rtl' })
+    return true
+  } catch { return false }
+}

@@ -1,8 +1,9 @@
+import { createPortal } from 'react-dom'
 import Icon from './Icon'
 
 // חלון שעולה מלמטה (לטפסים)
 export default function Sheet({ title, onClose, children }) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="pb-safe page-in max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5 dark:bg-navy-900">
         <div className="mb-4 flex items-center">
@@ -11,7 +12,8 @@ export default function Sheet({ title, onClose, children }) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

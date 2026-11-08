@@ -17,7 +17,7 @@ export default function Tile({ tile }) {
           {tile.locked && <Icon name="Lock" size={14} className="text-slate-400" />}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500 dark:text-slate-400">
-          {tile.dot && <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />}
+          {tile.dot && <span className={`h-2 w-2 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[tile.dot]}`} />}
           {tile.sub}
         </div>
       </div>

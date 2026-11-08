@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Logo from '../components/Logo'
-import { TRIBES } from '../data/profile'
+import { useSettings } from '../data/hooks'
 
 const field = 'w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[17px] outline-none transition focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20 dark:border-white/10 dark:bg-navy-950'
 
@@ -9,6 +9,7 @@ export default function Onboarding({ initial, onDone, onCancel }) {
   const [lastName, setLast] = useState(initial?.lastName || '')
   const [tribe, setTribe] = useState(initial?.tribe || '')
   const [tried, setTried] = useState(false)
+  const [{ tribes: TRIBES }] = useSettings()
   const ok = firstName.trim() && lastName.trim() && tribe
 
   function submit(e) {
