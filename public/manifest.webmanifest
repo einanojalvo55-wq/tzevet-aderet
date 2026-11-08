@@ -1,0 +1,12 @@
+{
+  "name": "צוות אדרת",
+  "short_name": "צוות אדרת",
+  "description": "האפליקציה של צוות בני עקיבא אדרת",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#122b52",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
