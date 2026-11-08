@@ -64,7 +64,7 @@ export default function Speaker({ profile }) {
     notify({ text: ok ? 'הבקשה שלך לרמקול אושרה ✓' : 'הבקשה שלך לרמקול נדחתה', kind: 'speaker', to: l.user, link: '/speaker' })
   }
   const take = (l) => update(l.id, { status: 'active', takenAt: Date.now() })
-  const giveBack = (l) => { update(l.id, { status: 'returned', returnedAt: Date.now() }); notify({ text: `${l.user} החזיר/ה את הרמקול ל${SPEAKER_HOME}`, kind: 'speaker', to: 'admins', link: '/speaker' }) }
+  const giveBack = (l) => { update(l.id, { status: 'returned', returnedAt: Date.now() }); notify({ text: `${l.user} החזיר/ה את הרמקול`, kind: 'speaker', to: 'admins', link: '/speaker' }) }
   const conflict = st.kind === 'out' && st.loan.user !== me
 
   const big = { green: 'from-emerald-500 to-emerald-700', rose: 'from-rose-500 to-rose-700', amber: 'from-amber-400 to-amber-600' }[st.color]
@@ -160,7 +160,7 @@ function RequestForm({ loans, onClose, onSend }) {
         <input className={field} value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="לאיזה צורך? (פעולה, טיול...)" />
         <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-500/10">
           <div className="mb-1.5 text-sm font-extrabold text-amber-800 dark:text-amber-300">לפני שלוקחים:</div>
-          <ul className="space-y-1 text-sm text-amber-900 dark:text-amber-200">{SPEAKER_TERMS.map((x) => <li key={x}>• {x}</li>)}<li>• החזרה ל{SPEAKER_HOME}: <span dir="ltr">{SPEAKER_HOME_PHONE}</span></li></ul>
+          <ul className="space-y-1 text-sm text-amber-900 dark:text-amber-200">{SPEAKER_TERMS.map((x) => <li key={x}>• {x}</li>)}<li>• לוקחים ומחזירים מ{SPEAKER_HOME}: <span dir="ltr">{SPEAKER_HOME_PHONE}</span></li></ul>
           <button type="button" onClick={() => setAgree(!agree)} className="mt-3 flex w-full items-center gap-3 text-right">
             <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg border-2 ${agree ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-amber-400 bg-white dark:bg-navy-950'}`}>{agree && <Icon name="Check" size={16} />}</span>
             <span className="font-bold text-amber-900 dark:text-amber-200">קראתי ואני מסכים/ה לכל התנאים</span>
@@ -182,7 +182,7 @@ function Terms() {
         ))}
       </ul>
       <a href={`tel:${SPEAKER_HOME_PHONE}`} className="mt-3 flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2.5 font-bold dark:bg-white/5">
-        <Icon name="Phone" size={16} className="text-rose-600" />החזרה ל{SPEAKER_HOME}<span className="mr-auto text-slate-500" dir="ltr">{SPEAKER_HOME_PHONE}</span>
+        <Icon name="Phone" size={16} className="text-rose-600" />לוקחים ומחזירים מ{SPEAKER_HOME}<span className="mr-auto text-slate-500" dir="ltr">{SPEAKER_HOME_PHONE}</span>
       </a>
     </section>
   )
