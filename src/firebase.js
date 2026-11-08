@@ -1,4 +1,4 @@
-import { firebaseConfig, vapidKey } from './firebase-config'
+import { firebaseConfig, vapidKey, pushUrl } from './firebase-config'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore'
@@ -57,4 +57,14 @@ export async function loadImage(id) {
   await ready
   const s = await getDoc(doc(db, 'images', id))
   return s.exists() ? s.data().data : null
+}
+
+// מבקש מהשרת לשלוח מיד את ההתראה לטלפונים (אם השרת לא זמין, GitHub ישלח אחר כך)
+export async function pushNow(id) {
+  if (!online || !pushUrl) return
+  try {
+    const u = await ready
+    const token = await u.getIdToken()
+    await fetch(pushUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ ids: [id] }) })
+  } catch { /* השרת לא זמין, הגיבוי ב-GitHub ישלח */ }
 }

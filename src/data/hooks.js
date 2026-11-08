@@ -1,5 +1,5 @@
 import { useStore, write, newId } from './store'
-import { online, uid } from '../firebase'
+import { online, uid, pushNow } from '../firebase'
 import { seedAnnouncements, seedContacts, seedEvents, seedSettings, seedBookings } from './seed'
 import { loadProfile } from './profile'
 
@@ -45,9 +45,10 @@ export function isForMe(n, profile, isAdmin) {
 // יוצר התראה. כרגע נשמרת במכשיר ומוצגת כהתראת מערכת אם יש הרשאה.
 // כשנחבר שרת, אותה פונקציה תשלח התראת Push לטלפונים של הצוות.
 export function notify({ text, kind, to = 'all', link = '/' }) {
-  write('notifications', (list) => [{ id: newId(), text, kind, to, link, from: uid() || null, createdAt: Date.now() }, ...(list || [])].slice(0, 200))
+  const id = newId()
+  const saved = write('notifications', (list) => [{ id, text, kind, to, link, from: uid() || null, createdAt: Date.now() }, ...(list || [])].slice(0, 200))
   // עם שרת: ההתראה לטלפונים נשלחת מהשרת (Push), גם כשהאפליקציה סגורה
-  if (online) return
+  if (online) { Promise.resolve(saved).then(() => pushNow(id)); return }
   const profile = loadProfile()
   let isAdmin = false, prefs = {}
   try { isAdmin = JSON.parse(localStorage.getItem('tzevet-aderet:isAdmin')); prefs = JSON.parse(localStorage.getItem('tzevet-aderet:notifPrefs')) || {} } catch { /* */ }
