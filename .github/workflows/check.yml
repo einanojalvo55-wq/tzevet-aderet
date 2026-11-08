@@ -1,0 +1,14 @@
+# בדיקה: מה האתר מגיש בפועל בשתי הכתובות
+name: Check site
+on: workflow_dispatch
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in https://tzevet-aderet.web.app https://einanojalvo55-wq.github.io/tzevet-aderet; do
+            echo "=== $u"
+            curl -sI "$u/" | grep -iE "^HTTP|cache-control|last-modified"
+            echo -n "version.json: "; curl -s "$u/version.json"; echo
+            curl -s "$u/" | grep -o 'assets/index-[^"]*\.js'
+          done
