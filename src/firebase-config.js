@@ -11,4 +11,4 @@ export const firebaseConfig = import.meta.env.VITE_OFFLINE ? null : {
 }
 
 // מפתח ציבורי להתראות Push (Cloud Messaging → Web Push certificates)
-export const vapidKey = null
+export const vapidKey = 'BJUVzNpfD1vp6SpYp2aIWja9xvi4QOHvWfRcGl5stGeFj5QuUE0D8KunhLReJBoCr6Z9Z7OVm3Y6SbIY3WmAhwM'
