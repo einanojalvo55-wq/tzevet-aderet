@@ -85,7 +85,7 @@ function AdminPanel({ onExit }) {
   const links = [
     { to: '/announcements', icon: 'Megaphone', title: 'פרסום הודעות' },
     { to: '/events', icon: 'CalendarDays', title: 'יצירת אירועים ואישורי הגעה' },
-    { to: '/rooms', icon: 'DoorOpen', title: 'שיבוץ חדרים' },
+    { to: '/rooms', icon: 'DoorOpen', title: 'שיבוץ קבוע של חדרים' },
     { to: '/speaker', icon: 'Speaker', title: 'אישור השאלות רמקול' },
     { to: '/reports', icon: 'ClipboardList', title: 'טיפול בדיווחים' },
     { to: '/contacts', icon: 'Phone', title: 'עריכת מספרים חשובים' },
@@ -119,7 +119,7 @@ function AdminPanel({ onExit }) {
 
       <button onClick={() => setSettings({ ...settings, speakerApproval: !settings.speakerApproval })} className="flex w-full items-center gap-3 rounded-3xl bg-white p-4 text-right shadow-card dark:bg-navy-900">
         <Icon name="Speaker" size={20} className="text-emerald-600" />
-        <div className="flex-1"><div className="font-extrabold">אישור מנהל להשאלת רמקול</div><div className="text-sm text-slate-500">{settings.speakerApproval ? 'כל בקשה מחכה לאישור' : 'כל מדריך לוקח מיד, בלי אישור'}</div></div>
+        <div className="flex-1"><div className="font-extrabold">אישור מנהל להשאלת רמקול</div><div className="text-sm text-slate-500">{settings.speakerApproval ? 'כל בקשה מחכה לאישור' : 'כל אחד לוקח כשהרמקול פנוי, בלי אישור'}</div></div>
         <span className={`flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition ${settings.speakerApproval ? 'justify-start bg-emerald-500' : 'justify-end bg-slate-300 dark:bg-white/20'}`}><span className="h-5 w-5 rounded-full bg-white shadow" /></span>
       </button>
 

@@ -30,7 +30,7 @@ export default function Profile({ profile, onSave, onReset }) {
   async function test() {
     if (online) {
       notify({ text: 'זו התראת בדיקה. אם רואים אותה, הכול עובד 🎉', kind: 'test', to: fullName(profile), link: '/profile' })
-      return setMsg('נשלחה התראת בדיקה מהשרת. היא אמורה להגיע תוך כמה שניות')
+      return setMsg('נשלחה התראת בדיקה. היא תגיע לטלפון תוך כמה דקות')
     }
     const ok = await showSystemNotification('זו התראת בדיקה. אם רואים אותה, הכול עובד 🎉')
     setMsg(ok ? 'נשלחה התראת בדיקה' : 'לא הצלחנו להציג התראה. צריך קודם להפעיל התראות')

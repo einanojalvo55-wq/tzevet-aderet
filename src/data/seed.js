@@ -18,7 +18,7 @@ export const seedContacts = [
 export const seedSettings = {
   tribes: ['שבט ד׳', 'שבט ה׳', 'שבט ו׳', 'שבט ז׳', 'שבט ח׳', 'שבט ט׳'],
   rooms: ['חדר גדול', 'חדר קטן', 'מחסן', 'חצר'],
-  speakerApproval: true,
+  speakerApproval: false, // כל אחד יכול לקחת כשהרמקול פנוי
 }
 
 export const EVENT_TYPES = {

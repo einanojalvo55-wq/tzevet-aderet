@@ -5,7 +5,7 @@ import Logo from '../components/Logo'
 import { useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
 import { speakerStatus } from './Speaker'
 import { DAYS } from '../data/seed'
-import { todayISO, relDay, eventTime, toMin } from '../data/dates'
+import { todayISO, relDay, eventTime, toMin, parseISO } from '../data/dates'
 
 function greeting() {
   const h = new Date().getHours()
@@ -29,14 +29,18 @@ export default function Home({ profile }) {
   const next = events.filter((e) => e.date >= todayISO()).sort((x, y) => eventTime(x) - eventTime(y))[0]
   const sp = speakerStatus(loans)
   const today = new Date().getDay()
-  const mine = bookings.filter((b) => b.who === profile.tribe).sort((x, y) => ((x.day - today + 7) % 7) - ((y.day - today + 7) % 7) || toMin(x.from) - toMin(y.from))[0]
+  const tISO = todayISO()
+  // השיבוץ הקרוב של השבט שלי או שלי: קודם היום, אחר כך הימים הבאים
+  const daysAway = (b) => (b.date ? Math.round((parseISO(b.date) - parseISO(tISO)) / 86400000) : (b.day - today + 7) % 7)
+  const mine = bookings.filter((b) => (b.who === profile.tribe || b.by === fullName(profile)) && (!b.date || b.date >= tISO))
+    .sort((x, y) => daysAway(x) - daysAway(y) || toMin(x.from) - toMin(y.from))[0]
   const openReports = reports.filter((r) => r.status !== 'done' && (isAdmin || r.by === fullName(profile))).length
   const pendingLoans = isAdmin ? loans.filter((l) => l.status === 'pending').length : 0
 
   const tiles = [
     { id: 'announcements', title: 'הודעות', icon: 'Megaphone', color: 'blue', badge: unread, sub: unread ? `${unread} לא נקראו` : 'הכול נקרא' },
     { id: 'events', title: 'אירועים', icon: 'CalendarDays', color: 'violet', sub: next ? `${next.title} · ${relDay(next.date)}` : 'אין אירועים קרובים' },
-    { id: 'rooms', title: 'שיבוץ חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${mine.day === today ? 'היום' : `יום ${DAYS[mine.day]}`}` : 'עוד לא שובצתם' },
+    { id: 'rooms', title: 'חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`}` : 'הזמנת חדר פנוי' },
     { id: 'speaker', title: 'רמקול', icon: 'Speaker', color: 'green', sub: sp.label, dot: sp.color, badge: pendingLoans },
     { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין דיווחים פתוחים' },
     { id: 'contacts', title: 'מספרים חשובים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
