@@ -51,7 +51,7 @@ export default function Home({ profile }) {
             <div className="text-sm text-navy-100/80">צוות אדרת</div>
             <h1 className="text-2xl font-extrabold">{greeting()}, {profile.firstName}</h1>
           </div>
-          <Logo className="h-11 w-11 rounded-2xl shadow-lg ring-1 ring-white/20" />
+          <Logo className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/20" />
         </div>
       </header>
 

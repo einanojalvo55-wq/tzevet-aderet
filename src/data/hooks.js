@@ -57,7 +57,7 @@ export async function showSystemNotification(text) {
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted') return false
     const reg = await navigator.serviceWorker?.getRegistration?.()
-    if (reg) await reg.showNotification('צוות אדרת', { body: text, icon: './icon.svg', lang: 'he', dir: 'rtl' })
+    if (reg) await reg.showNotification('צוות אדרת', { body: text, lang: 'he', dir: 'rtl' })
     else new Notification('צוות אדרת', { body: text, lang: 'he', dir: 'rtl' })
     return true
   } catch { return false }

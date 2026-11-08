@@ -22,7 +22,7 @@ export default function Onboarding({ initial, onDone, onCancel }) {
   return (
     <div className="page-in pt-safe mx-auto flex min-h-full max-w-md flex-col px-5 pb-10">
       <div className="flex flex-col items-center pt-12 text-center">
-        <Logo className="h-20 w-20 rounded-3xl shadow-xl" />
+        <Logo className="h-28 w-28 rounded-[28px] shadow-xl" />
         <h1 className="mt-5 text-3xl font-extrabold">{initial ? 'עריכת פרופיל' : 'ברוכים הבאים לצוות אדרת'}</h1>
         {!initial && <p className="mt-2 text-slate-500 dark:text-slate-400">רק כמה פרטים ונכנסים</p>}
       </div>
