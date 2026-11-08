@@ -1,0 +1,18 @@
+# כל 5 דקות: תזכורות לאירועים ולרמקול, וגיבוי לשליחת התראות
+# (פועל רק אחרי שמוסיפים את הסוד FIREBASE_SERVICE_ACCOUNT ואת המשתנה PUSH_ENABLED=true בהגדרות של GitHub)
+name: Reminders
+on:
+  schedule: [{ cron: '*/5 * * * *' }]
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: ${{ vars.PUSH_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save firebase-admin@13.4.0
+      - run: node scripts/worker.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
