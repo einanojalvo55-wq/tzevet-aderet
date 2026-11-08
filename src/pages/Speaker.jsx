@@ -5,6 +5,18 @@ import Sheet, { field, primaryBtn } from '../components/Sheet'
 import { useLoans, useAdmin, useSettings, fullName, notify } from '../data/hooks'
 import { fmtDateTime } from '../data/dates'
 import { newId } from '../data/store'
+import speakerImg from '../assets/speaker.png'
+
+// אצל מי הרמקול כשהוא פנוי, ולמי מחזירים
+export const SPEAKER_HOME = 'עינן'
+
+// תנאי ההשאלה: כל מי שמשאיל חייב לאשר אותם
+export const SPEAKER_TERMS = [
+  'הרמקול באחריותך המלאה מרגע שלקחת אותו ועד שהחזרת.',
+  'הרמקול מגיע אליך מלא בסוללה, ומחזירים אותו לעינן מלא בסוללה.',
+  'מחזירים תמיד עם המטען.',
+  'בלי מכות ובלי שריטות. שומרים עליו כמו על שלך.',
+]
 
 // מצב הרמקול כרגע: אצל מישהו / שמור / פנוי
 export function speakerStatus(loans) {
@@ -12,7 +24,7 @@ export function speakerStatus(loans) {
   if (active) return { kind: 'out', loan: active, label: `אצל ${active.user}`, color: 'rose' }
   const next = loans.filter((l) => l.status === 'approved').sort((a, b) => a.from - b.from)[0]
   if (next) return { kind: 'reserved', loan: next, label: `שמור ל${next.user}`, color: 'amber' }
-  return { kind: 'free', label: 'פנוי בסניף', color: 'green' }
+  return { kind: 'free', label: `פנוי אצל ${SPEAKER_HOME}`, color: 'green' }
 }
 
 const statusText = { pending: 'מחכה לאישור', approved: 'מאושר', active: 'אצלו עכשיו', returned: 'הוחזר', rejected: 'נדחה' }
@@ -43,18 +55,24 @@ export default function Speaker({ profile }) {
     notify({ text: ok ? 'הבקשה שלך לרמקול אושרה ✓' : 'הבקשה שלך לרמקול נדחתה', kind: 'speaker', to: l.user, link: '/speaker' })
   }
   const take = (l) => update(l.id, { status: 'active', takenAt: Date.now() })
-  const giveBack = (l) => { update(l.id, { status: 'returned', returnedAt: Date.now() }); notify({ text: `${l.user} החזיר/ה את הרמקול לסניף`, kind: 'speaker', to: 'admins', link: '/speaker' }) }
+  const giveBack = (l) => { update(l.id, { status: 'returned', returnedAt: Date.now() }); notify({ text: `${l.user} החזיר/ה את הרמקול ל${SPEAKER_HOME}`, kind: 'speaker', to: 'admins', link: '/speaker' }) }
   const conflict = st.kind === 'out' && st.loan.user !== me
 
-  const big = { green: 'from-emerald-500 to-emerald-600', rose: 'from-rose-500 to-rose-600', amber: 'from-amber-400 to-amber-500' }[st.color]
+  const big = { green: 'from-emerald-500 to-emerald-700', rose: 'from-rose-500 to-rose-700', amber: 'from-amber-400 to-amber-600' }[st.color]
   return (
     <div className="page-in mx-auto max-w-md px-4 pb-28">
       <PageHeader title="רמקול" />
-      <div className={`rounded-3xl bg-gradient-to-br ${big} p-6 text-white shadow-lg`}>
-        <Icon name="Speaker" size={32} />
-        <div className="mt-3 text-3xl font-extrabold">{st.label}</div>
-        {st.loan && <div className="mt-1 text-white/90">{st.kind === 'out' ? `מאז ${fmtDateTime(st.loan.takenAt || st.loan.from)} · מחזיר עד ${fmtDateTime(st.loan.to)}` : `מ-${fmtDateTime(st.loan.from)} עד ${fmtDateTime(st.loan.to)}`}</div>}
-        {st.kind === 'out' && st.loan.to < Date.now() && <div className="mt-2 inline-block rounded-full bg-white/25 px-3 py-1 text-sm font-bold">⚠️ עבר זמן ההחזרה</div>}
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${big} p-5 text-white shadow-lg`}>
+        <div className="absolute -left-10 -top-10 h-48 w-48 rounded-full bg-white/10" />
+        <div className="relative flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-white/80">JBL PartyBox · הרמקול של הצוות</div>
+            <div className="mt-1 text-[28px] font-extrabold leading-tight">{st.label}</div>
+            {st.loan && <div className="mt-1 text-sm text-white/90">{st.kind === 'out' ? `מאז ${fmtDateTime(st.loan.takenAt || st.loan.from)} · מחזיר עד ${fmtDateTime(st.loan.to)}` : `מ-${fmtDateTime(st.loan.from)} עד ${fmtDateTime(st.loan.to)}`}</div>}
+            {st.kind === 'out' && st.loan.to < Date.now() && <div className="mt-2 inline-block rounded-full bg-white/25 px-3 py-1 text-sm font-bold">⚠️ עבר זמן ההחזרה</div>}
+          </div>
+          <img src={speakerImg} alt="הרמקול" className="h-32 w-32 shrink-0 object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,.35)]" />
+        </div>
       </div>
 
       {myOpen.map((l) => (
@@ -63,7 +81,7 @@ export default function Speaker({ profile }) {
           <div className="mt-1 font-bold">{l.purpose}</div>
           <div className="text-sm text-slate-500">{fmtDateTime(l.from)} ← {fmtDateTime(l.to)}</div>
           {l.status === 'approved' && <button onClick={() => take(l)} disabled={conflict} className={`${primaryBtn} mt-3`}>{conflict ? 'הרמקול עוד אצל מישהו אחר' : 'לקחתי את הרמקול'}</button>}
-          {l.status === 'active' && <button onClick={() => giveBack(l)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-lg font-bold text-white active:scale-[.98]"><Icon name="Undo2" size={20} />החזרתי</button>}
+          {l.status === 'active' && <button onClick={() => giveBack(l)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-lg font-bold text-white active:scale-[.98]"><Icon name="Undo2" size={20} />החזרתי ל{SPEAKER_HOME}</button>}
         </div>
       ))}
 
@@ -71,6 +89,7 @@ export default function Speaker({ profile }) {
         <button onClick={() => setAsking(true)} className={`${primaryBtn} mt-4`}>אני רוצה לקחת את הרמקול</button>
       )}
       <p className="mt-2 px-1 text-center text-xs text-slate-400">{speakerApproval ? 'כל השאלה צריכה אישור של מנהל' : 'השאלה מיידית, בלי צורך באישור'}</p>
+      <Terms />
 
       {isAdmin && pending.length > 0 && (
         <section className="mt-5">
@@ -116,6 +135,7 @@ function RequestForm({ onClose, onSend }) {
   const [from, setFrom] = useState(toLocalInput(now))
   const [to, setTo] = useState(toLocalInput(now + 3 * 3600000))
   const [purpose, setPurpose] = useState('')
+  const [agree, setAgree] = useState(false)
   const f = new Date(from).getTime(), t = new Date(to).getTime()
   const bad = !(t > f)
   return (
@@ -125,8 +145,29 @@ function RequestForm({ onClose, onSend }) {
         <label className="block"><span className="mb-1 block text-sm font-semibold">מתי מחזיר</span><input type="datetime-local" className={field} value={to} onChange={(e) => setTo(e.target.value)} /></label>
         {bad && <p className="text-sm text-rose-600">זמן ההחזרה צריך להיות אחרי זמן הלקיחה</p>}
         <input className={field} value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="לאיזה צורך? (פעולה, טיול...)" />
-        <button disabled={bad || !purpose.trim()} onClick={() => onSend({ from: f, to: t, purpose: purpose.trim() })} className={primaryBtn}>שליחה</button>
+        <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-500/10">
+          <div className="mb-1.5 text-sm font-extrabold text-amber-800 dark:text-amber-300">לפני שלוקחים:</div>
+          <ul className="space-y-1 text-sm text-amber-900 dark:text-amber-200">{SPEAKER_TERMS.map((x) => <li key={x}>• {x}</li>)}</ul>
+          <button type="button" onClick={() => setAgree(!agree)} className="mt-3 flex w-full items-center gap-3 text-right">
+            <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg border-2 ${agree ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-amber-400 bg-white dark:bg-navy-950'}`}>{agree && <Icon name="Check" size={16} />}</span>
+            <span className="font-bold text-amber-900 dark:text-amber-200">קראתי ואני מסכים/ה לכל התנאים</span>
+          </button>
+        </div>
+        <button disabled={bad || !purpose.trim() || !agree} onClick={() => onSend({ from: f, to: t, purpose: purpose.trim(), agreedTerms: true })} className={primaryBtn}>שליחה</button>
       </div>
     </Sheet>
+  )
+}
+
+function Terms() {
+  return (
+    <section className="mt-4 rounded-3xl bg-white p-4 shadow-card dark:bg-navy-900">
+      <h2 className="mb-2 flex items-center gap-2 font-extrabold"><Icon name="ShieldCheck" size={18} className="text-emerald-600" />כללי השאלה</h2>
+      <ul className="space-y-1.5">
+        {SPEAKER_TERMS.map((t) => (
+          <li key={t} className="flex gap-2 text-[15px] text-slate-600 dark:text-slate-300"><Icon name="Check" size={16} className="mt-1 shrink-0 text-emerald-500" />{t}</li>
+        ))}
+      </ul>
+    </section>
   )
 }
