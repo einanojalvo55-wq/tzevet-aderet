@@ -1,40 +1,9 @@
 rules_version = '2';
-// חוקי האבטחה של צוות אדרת
+// חוקים פשוטים: רק מי שנכנס לאפליקציה יכול לקרוא ולכתוב
 service cloud.firestore {
   match /databases/{db}/documents {
-    function signedIn() { return request.auth != null; }
-    function isAdmin() { return signedIn() && exists(/databases/$(db)/documents/adminClaims/$(request.auth.uid)); }
-
-    // נתונים משותפים: כל הצוות קורא.
-    // מדריכים יכולים לכתוב רק לאירועים (אישורי הגעה), רמקול, דיווחים והתראות. את השאר רק מנהלים.
-    match /app/{key} {
-      allow read: if signedIn() && key != 'remindersSent';
-      allow write: if signedIn() && (key in ['events', 'speakerLoans', 'reports', 'notifications'] || isAdmin());
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
-
-    // פרופילים: כל הצוות רואה (שם, שבט, טלפון). כל אחד עורך רק את שלו, מנהל יכול להסיר.
-    match /users/{uid} {
-      allow read: if signedIn();
-      allow create, update: if signedIn() && request.auth.uid == uid;
-      allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
-    }
-
-    // תמונות של דיווחים
-    match /images/{id} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.data is string && request.resource.data.data.size() < 900000;
-      allow delete: if isAdmin();
-    }
-
-    // כניסת מנהל: נוצרת רק אם הסיסמה תואמת לסיסמה הסודית
-    match /adminClaims/{uid} {
-      allow read: if signedIn() && request.auth.uid == uid;
-      allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.password == get(/databases/$(db)/documents/secret/admin).data.password;
-      allow delete: if signedIn() && request.auth.uid == uid;
-    }
-
-    // הסיסמה הסודית: אף אחד לא יכול לקרוא אותה מהאפליקציה
-    match /secret/{doc} { allow read, write: if false; }
   }
 }

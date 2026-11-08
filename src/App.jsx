@@ -14,9 +14,9 @@ import Reports from './pages/Reports'
 import Notifications from './pages/Notifications'
 import Team from './pages/Team'
 import Links from './pages/Links'
-import { online, hasAdminClaim } from './firebase'
+import { online } from './firebase'
 import { loadProfile, saveProfile, clearProfile } from './data/profile'
-import { useEvents, useLoans, useAdmin, fullName, notify } from './data/hooks'
+import { useEvents, useLoans, fullName, notify } from './data/hooks'
 import { useStore } from './data/store'
 import { eventTime } from './data/dates'
 
@@ -55,11 +55,8 @@ function useReminders(profile) {
 export default function App() {
   const [profile, setProfile] = useState(loadProfile)
   const save = (p) => { saveProfile(p); setProfile(p) }
-  const [isAdmin, setAdmin] = useAdmin()
   useReminders(profile)
 
-  // עם שרת: מוודאים שמצב הניהול עדיין תקף (למשל אחרי שהסיסמה הוחלפה)
-  useEffect(() => { if (online && isAdmin) hasAdminClaim().then((ok) => { if (!ok) setAdmin(false) }) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // מי שנרשם לפני שהוספנו טלפון מתבקש להשלים אותו
   useEffect(() => { if (online && profile) saveProfile(profile) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

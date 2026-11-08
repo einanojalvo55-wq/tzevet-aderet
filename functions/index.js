@@ -12,15 +12,14 @@ const db = getFirestore()
 const REGION = 'europe-west1'
 
 async function recipients(to, kind, fromUid) {
-  const [users, claims] = await Promise.all([db.collection('users').get(), db.collection('adminClaims').get()])
-  const admins = new Set(claims.docs.map((d) => d.id))
+  const users = await db.collection('users').get()
   return users.docs.filter((d) => {
     const u = d.data()
     if (!u.tokens?.length) return false
     if (kind !== 'test' && d.id === fromUid) return false // לא שולחים לעצמך
     if (kind !== 'important' && kind !== 'test' && u.prefs?.[kind] === false) return false
     if (to === 'all') return true
-    if (to === 'admins') return admins.has(d.id)
+    if (to === 'admins') return !!u.isAdmin
     if (to.startsWith('tribe:')) return u.tribe === to.slice(6)
     return u.name === to
   })

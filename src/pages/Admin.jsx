@@ -3,13 +3,12 @@ import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import { field, primaryBtn } from '../components/Sheet'
-import { online, claimAdmin, dropAdmin } from '../firebase'
-import { loadProfile } from '../data/profile'
+import { saveUser } from '../firebase'
 import { useAdmin, useSettings, useReports, useLoans, useEvents } from '../data/hooks'
 import { todayISO } from '../data/dates'
 
-// בלי שרת: סיסמה זמנית לתצוגה. עם שרת: הסיסמה נבדקת בשרת בלבד ולא מופיעה בקוד.
-const TEMP_PASSWORD = '1234'
+// סיסמת המנהלים (אפשר להחליף כאן)
+const ADMIN_PASSWORD = '23235'
 const LOCK_KEY = 'tzevet-aderet:adminLock'
 const getLock = () => { try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || { fails: 0, until: 0 } } catch { return { fails: 0, until: 0 } } }
 const setLock = (v) => { try { localStorage.setItem(LOCK_KEY, JSON.stringify(v)) } catch { /* */ } }
@@ -18,17 +17,13 @@ export default function Admin() {
   const [isAdmin, setAdmin] = useAdmin()
   const [pw, setPw] = useState('')
   const [err, setErr] = useState('')
-  const [busy, setBusy] = useState(false)
 
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault()
     const lock = getLock()
     if (lock.until > Date.now()) return setErr(`יותר מדי ניסיונות. נסו שוב בעוד ${Math.ceil((lock.until - Date.now()) / 60000)} דקות`)
-    setBusy(true)
-    const p = loadProfile()
-    const ok = online ? await claimAdmin(pw, p ? `${p.firstName} ${p.lastName}` : '') : pw === TEMP_PASSWORD
-    setBusy(false)
-    if (ok) { setLock({ fails: 0, until: 0 }); setAdmin(true); return }
+    const ok = pw.trim() === ADMIN_PASSWORD
+    if (ok) { setLock({ fails: 0, until: 0 }); setAdmin(true); saveUser({ isAdmin: true }).catch(() => {}); return }
     const fails = lock.fails + 1
     setLock(fails >= 5 ? { fails: 0, until: Date.now() + 15 * 60000 } : { fails, until: 0 })
     setErr(fails >= 5 ? 'יותר מדי ניסיונות. המסך נעול ל-15 דקות' : 'סיסמה שגויה')
@@ -43,14 +38,14 @@ export default function Admin() {
         <div className="grid h-16 w-16 place-items-center rounded-3xl bg-navy-100 text-navy-700 dark:bg-white/10 dark:text-white"><Icon name="Lock" size={28} /></div>
         <div className="mt-4 text-lg font-bold">אזור מוגן</div>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">הקלידו את סיסמת הניהול כדי להיכנס</p>
-        <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); setErr('') }} placeholder="סיסמה" className={`${field} mt-5 text-center text-lg`} />
+        <input type="password" inputMode="numeric" value={pw} onChange={(e) => { setPw(e.target.value); setErr('') }} placeholder="סיסמה" className={`${field} mt-5 text-center text-lg`} />
         {err && <p className="mt-2 text-sm font-medium text-rose-600">{err}</p>}
-        <button disabled={busy || !pw} className={`${primaryBtn} mt-3`}>{busy ? 'בודק...' : 'כניסה'}</button>
+        <button disabled={!pw} className={`${primaryBtn} mt-3`}>כניסה</button>
       </form>
     </div>
   )
 
-  return <AdminPanel onExit={() => { setAdmin(false); if (online) dropAdmin() }} />
+  return <AdminPanel onExit={() => { setAdmin(false); saveUser({ isAdmin: false }).catch(() => {}) }} />
 }
 
 function ListEditor({ title, items, onChange, placeholder }) {

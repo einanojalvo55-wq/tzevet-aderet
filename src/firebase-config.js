@@ -1,6 +1,7 @@
 // פרטי החיבור לפרויקט Firebase של צוות אדרת.
 // הפרטים האלה לא סודיים (הם מופיעים בכל אפליקציית רשת), האבטחה היא בחוקים של Firestore.
-export const firebaseConfig = {
+// בתצוגה המקדימה (VITE_OFFLINE) האפליקציה עובדת בלי שרת
+export const firebaseConfig = import.meta.env.VITE_OFFLINE ? null : {
   apiKey: 'AIzaSyDNBY4CayU_BflmMIfsfcmCsZn9f6vgepg',
   authDomain: 'tzevet-aderet.firebaseapp.com',
   projectId: 'tzevet-aderet',

@@ -1,7 +1,7 @@
 import { firebaseConfig, vapidKey } from './firebase-config'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, deleteDoc, updateDoc, arrayUnion } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore'
 import { getMessaging, getToken, isSupported } from 'firebase/messaging'
 
 // האם מחוברים לשרת
@@ -33,20 +33,6 @@ export async function saveUser(data) {
   if (!online) return
   const u = await ready
   await setDoc(doc(db, 'users', u.uid), { ...data, updatedAt: Date.now() }, { merge: true })
-}
-
-// כניסת מנהל: הסיסמה נבדקת בחוקים של השרת, ואם היא שגויה השמירה נכשלת
-export async function claimAdmin(password, name) {
-  const u = await ready
-  try { await setDoc(doc(db, 'adminClaims', u.uid), { password, name, at: Date.now() }); return true } catch { return false }
-}
-export async function hasAdminClaim() {
-  const u = await ready
-  try { return (await getDoc(doc(db, 'adminClaims', u.uid))).exists() } catch { return false }
-}
-export async function dropAdmin() {
-  const u = await ready
-  try { await deleteDoc(doc(db, 'adminClaims', u.uid)) } catch { /* */ }
 }
 
 // התראות Push: מבקש הרשאה, רושם את הטלפון ושומר אותו בשרת
