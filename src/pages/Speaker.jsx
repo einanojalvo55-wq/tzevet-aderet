@@ -157,7 +157,7 @@ function RequestForm({ loans, onClose, onSend }) {
         <label className="block"><span className="mb-1 block text-sm font-semibold">מתי מחזיר</span><input type="datetime-local" className={field} value={to} onChange={(e) => setTo(e.target.value)} /></label>
         {bad && <p className="text-sm text-rose-600">זמן ההחזרה צריך להיות אחרי זמן הלקיחה</p>}
         {clash && <Taken who={clash.user} phone={clash.phone} from={span(clash).from} to={span(clash).to} what="הרמקול תפוס בזמן הזה" />}
-        <input className={field} value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="לאיזה צורך? (פעולה, טיול...)" />
+        <input className={field} value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="לאיזה צורך? (פעולה, אירוע...)" />
         <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-500/10">
           <div className="mb-1.5 text-sm font-extrabold text-amber-800 dark:text-amber-300">לפני שלוקחים:</div>
           <ul className="space-y-1 text-sm text-amber-900 dark:text-amber-200">{SPEAKER_TERMS.map((x) => <li key={x}>• {x}</li>)}<li>• לוקחים ומחזירים מ{SPEAKER_HOME}: <span dir="ltr">{SPEAKER_HOME_PHONE}</span></li></ul>
