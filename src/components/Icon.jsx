@@ -1,6 +1,6 @@
-import { Megaphone, CalendarDays, DoorOpen, Speaker, ClipboardList, Phone, Settings, Home, Bell, User, Lock, ChevronLeft, ArrowRight, Construction } from 'lucide-react'
+import { Megaphone, CalendarDays, DoorOpen, Speaker, ClipboardList, Phone, Settings, Home, Bell, User, Lock, ChevronLeft, ArrowRight, Construction, LogOut } from 'lucide-react'
 
-const map = { Megaphone, CalendarDays, DoorOpen, Speaker, ClipboardList, Phone, Settings, Home, Bell, User, Lock, ChevronLeft, ArrowRight, Construction }
+const map = { Megaphone, CalendarDays, DoorOpen, Speaker, ClipboardList, Phone, Settings, Home, Bell, User, Lock, ChevronLeft, ArrowRight, Construction, LogOut }
 
 export default function Icon({ name, ...props }) {
   const C = map[name]

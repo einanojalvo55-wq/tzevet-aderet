@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
 import Tile from '../components/Tile'
 import Logo from '../components/Logo'
-import { currentUser, latestAnnouncement as a, tiles } from '../data/mock'
+import { latestAnnouncement as a, tiles } from '../data/mock'
 
 function greeting() {
   const h = new Date().getHours()
@@ -12,14 +12,14 @@ function greeting() {
   return 'לילה טוב'
 }
 
-export default function Home() {
+export default function Home({ profile }) {
   return (
     <div className="page-in">
       <header className="pt-safe bg-gradient-to-b from-navy-800 to-navy-700 px-5 pb-16 text-white dark:from-navy-900 dark:to-navy-900">
         <div className="mx-auto flex max-w-md items-center justify-between pt-5">
           <div>
             <div className="text-sm text-navy-100/80">צוות אדרת</div>
-            <h1 className="text-2xl font-extrabold">{greeting()}, {currentUser.name}</h1>
+            <h1 className="text-2xl font-extrabold">{greeting()}, {profile.firstName}</h1>
           </div>
           <Logo className="h-11 w-11 rounded-2xl shadow-lg ring-1 ring-white/20" />
         </div>
@@ -41,7 +41,7 @@ export default function Home() {
         </Link>
 
         <div className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => <Tile key={t.id} tile={t} />)}
+          {tiles.map((t) => <Tile key={t.id} tile={t.id === 'rooms' ? { ...t, sub: `${profile.tribe}: חדר גדול` } : t} />)}
         </div>
       </main>
     </div>

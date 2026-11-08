@@ -1,5 +1,4 @@
 // נתוני דוגמה לשלב 1. בשלב 2 הם יוחלפו בנתונים אמיתיים מ-Firebase.
-export const currentUser = { name: 'עינן', role: 'owner', tribe: 'שבט נעם' }
 
 export const latestAnnouncement = {
   title: 'ישיבת צוות ביום חמישי ב-20:30',
