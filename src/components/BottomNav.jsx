@@ -6,7 +6,7 @@ export default function BottomNav({ profile }) {
   const [list] = useNotifications()
   const [seen] = useNotifSeen()
   const [isAdmin] = useAdmin()
-  const unseen = list.filter((n) => n.createdAt > seen && isForMe(n, profile, isAdmin)).length
+  const unseen = list.filter((n) => n.kind !== 'test' && n.createdAt > seen && isForMe(n, profile, isAdmin)).length
   const tabs = [
     { to: '/', label: 'בית', icon: 'Home' },
     { to: '/events', label: 'אירועים', icon: 'CalendarDays' },

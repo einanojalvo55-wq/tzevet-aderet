@@ -5,7 +5,7 @@ import Icon from './Icon'
 export default function Sheet({ title, onClose, children }) {
   return createPortal(
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="pb-safe page-in max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5 dark:bg-navy-900">
+      <div onClick={(e) => e.stopPropagation()} className="pb-safe sheet-in max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5 dark:bg-navy-900">
         <div className="mb-4 flex items-center">
           <h2 className="flex-1 text-xl font-extrabold">{title}</h2>
           <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 dark:bg-white/10" aria-label="סגירה"><Icon name="X" size={18} /></button>

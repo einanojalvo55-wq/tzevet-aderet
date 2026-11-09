@@ -12,7 +12,7 @@ export default function Notifications({ profile }) {
   const [seen, setSeen] = useNotifSeen()
   const [isAdmin] = useAdmin()
   const [seenAtOpen] = useState(seen)
-  const mine = list.filter((n) => isForMe(n, profile, isAdmin))
+  const mine = list.filter((n) => n.kind !== 'test' && isForMe(n, profile, isAdmin))
   useEffect(() => { setSeen(Date.now()) }, [list.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

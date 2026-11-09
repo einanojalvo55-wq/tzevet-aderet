@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
 import Home from './pages/Home'
 import Admin from './pages/Admin'
@@ -52,6 +52,13 @@ function useReminders(profile) {
   }, [events, loans, profile, sent]) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
+// כל מעבר מסך מתחיל מלמעלה (בלי זה המסך החדש נפתח באמצע)
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
 export default function App() {
   const [profile, setProfile] = useState(loadProfile)
   const save = (p) => { saveProfile(p); setProfile(p) }
@@ -64,6 +71,7 @@ export default function App() {
 
   return (
     <HashRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home profile={profile} />} />
         <Route path="/announcements" element={<Announcements profile={profile} />} />

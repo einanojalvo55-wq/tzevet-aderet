@@ -9,5 +9,11 @@ body {
 }
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .pt-safe { padding-top: max(env(safe-area-inset-top), 0px); }
-@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.page-in { animation: pageIn .25s ease-out both; }
+/* מעבר עדין בין מסכים: רק שקיפות, בלי תזוזה (תזוזה גרמה לטשטוש ולקפיצות) */
+@keyframes pageIn { from { opacity: .4; } to { opacity: 1; } }
+.page-in { animation: pageIn .18s ease-out; }
+/* בלי "קפיצה" של המסך כשגוללים מעבר לקצה */
+html, body { overscroll-behavior: none; }
+
+@keyframes sheetIn { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-in { animation: sheetIn .22s ease-out; }
