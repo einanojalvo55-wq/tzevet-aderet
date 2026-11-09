@@ -88,8 +88,6 @@ export default function App() {
   return (
     <HashRouter>
       <ScrollToTop />
-      {/* רקע כחול מאחורי שורת השעון של האייפון, כדי שהשעון ייראה ושום תוכן לא יגלוש מתחתיו */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-30 bg-navy-800 dark:bg-navy-950" style={{ height: 'env(safe-area-inset-top)' }} />
       <Routes>
         <Route path="/" element={<Home profile={profile} />} />
         <Route path="/announcements" element={<Announcements profile={profile} />} />
