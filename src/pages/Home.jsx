@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
 import Tile from '../components/Tile'
@@ -63,6 +64,7 @@ export default function Home({ profile }) {
           <div>
             <div className="text-sm text-navy-100/80">צוות אדרת</div>
             <h1 className="text-2xl font-extrabold">{greeting()}, {profile.firstName}</h1>
+            <Clock />
           </div>
           <Logo className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/20" />
         </div>
@@ -79,14 +81,29 @@ export default function Home({ profile }) {
                 הודעה אחרונה {a.important && <span className="rounded-full bg-accent-500/15 px-2 py-0.5">חשוב</span>}
               </div>
               <div className="mt-0.5 font-bold leading-snug">{a.title}</div>
-              {a.body && <div className="mt-0.5 line-clamp-1 text-sm text-slate-500 dark:text-slate-400">{a.body}</div>}
+              {a.body && <div className="mt-0.5 line-clamp-1 text-sm text-slate-500 dark:text-slate-400 [@media(max-height:700px)]:hidden">{a.body}</div>}
             </div>
           </Link>
         )}
-        <div className="grid flex-1 grid-cols-3 gap-2.5" style={{ gridTemplateRows: 'repeat(3, minmax(96px, 1fr)) auto' }}>
+        <div className="grid flex-1 grid-cols-3 gap-2.5" style={{ gridTemplateRows: 'repeat(3, minmax(80px, 1fr)) auto' }}>
           {tiles.map((t) => <Tile key={t.id} tile={t} />)}
         </div>
       </main>
+    </div>
+  )
+}
+
+// שעון ותאריך שמתעדכנים לבד
+function Clock() {
+  const [now, setNow] = useState(new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 15000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div className="mt-1 flex items-center gap-2 text-sm text-navy-100/85">
+      <span className="rounded-lg bg-white/15 px-2 py-0.5 font-bold tabular-nums text-white">{now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
+      <span>{now.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
     </div>
   )
 }

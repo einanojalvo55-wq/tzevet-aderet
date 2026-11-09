@@ -16,7 +16,7 @@ export default function Tile({ tile }) {
       to={`/${tile.id}`}
       className="relative flex flex-col items-center justify-center gap-2 rounded-3xl bg-white px-1 py-2 text-center shadow-card ring-1 ring-slate-900/5 transition active:scale-[.97] dark:bg-navy-900 dark:ring-white/5"
     >
-      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${tone[tile.color]}`}>
+      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl [@media(max-height:700px)]:h-10 [@media(max-height:700px)]:w-10 ${tone[tile.color]}`}>
         <Icon name={tile.icon} size={24} />
       </div>
       <div className="min-w-0 max-w-full">
@@ -24,7 +24,7 @@ export default function Tile({ tile }) {
           {tile.title}
           {tile.locked && <Icon name="Lock" size={12} className="text-slate-400" />}
         </div>
-        <div className="mt-0.5 flex items-center justify-center gap-1 truncate px-1 text-[11.5px] text-slate-500 dark:text-slate-400">
+        <div className="mt-0.5 flex items-center justify-center gap-1 truncate px-1 text-[11.5px] text-slate-500 dark:text-slate-400 [@media(max-height:700px)]:hidden">
           {tile.dot && <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[tile.dot]}`} />}
           <span className="truncate">{tile.sub}</span>
         </div>
