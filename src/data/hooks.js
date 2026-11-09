@@ -13,6 +13,7 @@ export const useEvents = () => useStore('events', seedEvents)
 export const useLoans = () => useStore('speakerLoans', [])
 export const useBookings = () => useStore('roomBookings', seedBookings)
 export const useReports = () => useStore('reports', [])
+export const useRefunds = () => useStore('refunds', [])
 export const useNotifications = () => useStore('notifications', [])
 export const useNotifSeen = () => useStore('notificationsSeen', 0)
 export const useNotifPrefs = () => useStore('notifPrefs', {})
@@ -31,6 +32,7 @@ export const NOTIF_KINDS = {
   room: 'שינויים בשיבוץ חדרים',
   speaker: 'השאלת הרמקול',
   report: 'דיווחים',
+  refund: 'החזרים כספיים',
 }
 
 // to: 'all' | 'admins' | 'tribe:<שבט>' | '<שם מלא>'

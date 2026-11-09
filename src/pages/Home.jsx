@@ -3,7 +3,7 @@ import Icon from '../components/Icon'
 import Tile from '../components/Tile'
 import Logo from '../components/Logo'
 import NotifBanner from '../components/NotifBanner'
-import { useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
+import { useRefunds, useSettings, useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
 import { speakerStatus } from './Speaker'
 import { DAYS } from '../data/seed'
 import { todayISO, relDay, eventTime, toMin, parseISO } from '../data/dates'
@@ -24,6 +24,8 @@ export default function Home({ profile }) {
   const [loans] = useLoans()
   const [bookings] = useBookings()
   const [reports] = useReports()
+  const [refunds] = useRefunds()
+  const [settings] = useSettings()
 
   const unread = list.filter((x) => !readIds.includes(x.id)).length
   const a = sortAnnouncements(list)[0]
@@ -38,20 +40,25 @@ export default function Home({ profile }) {
   const openReports = reports.filter((r) => r.status !== 'done' && (isAdmin || r.by === fullName(profile))).length
   const pendingLoans = isAdmin ? loans.filter((l) => l.status === 'pending').length : 0
 
+  const me = fullName(profile)
+  const refundMgr = isAdmin || me === (settings.refundsManager ?? 'נועה הדר')
+  const refundBadge = refundMgr ? refunds.filter((r) => r.status === 'pending').length : 0
+  const myRefunds = refunds.filter((r) => r.by === me && ['pending', 'approved'].includes(r.status)).length
   const tiles = [
-    { id: 'announcements', title: 'הודעות', icon: 'Megaphone', color: 'blue', badge: unread, sub: unread ? `${unread} לא נקראו` : 'הכול נקרא' },
-    { id: 'events', title: 'אירועים', icon: 'CalendarDays', color: 'violet', sub: next ? `${next.title} · ${relDay(next.date)}` : 'אין אירועים קרובים' },
+    { id: 'announcements', title: 'הודעות', icon: 'Megaphone', color: 'blue', badge: unread, sub: unread ? `${unread} חדשות` : 'הכול נקרא' },
+    { id: 'events', title: 'אירועים', icon: 'CalendarDays', color: 'violet', sub: next ? relDay(next.date) : 'אין קרובים' },
     { id: 'rooms', title: 'חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`}` : 'הזמנת חדר פנוי' },
     { id: 'speaker', title: 'רמקול', icon: 'Speaker', color: 'green', sub: sp.label, dot: sp.color, badge: pendingLoans },
-    { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין דיווחים פתוחים' },
-    { id: 'contacts', title: 'מספרים חשובים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
-    { id: 'links', title: 'קישורים חשובים', icon: 'Link', color: 'sky', sub: 'טפסים, אתרים ומסמכים' },
-    { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים והטלפונים' },
-    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'כניסה עם סיסמה', locked: !isAdmin, wide: true },
+    { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין פתוחים' },
+    { id: 'contacts', title: 'מספרים', icon: 'Phone', color: 'rose', sub: 'מספרים חשובים' },
+    { id: 'links', title: 'קישורים', icon: 'Link', color: 'sky', sub: 'טפסים ואתרים' },
+    { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים' },
+    { id: 'refunds', title: 'החזרים', icon: 'Receipt', color: 'green', badge: refundBadge, sub: refundMgr ? (refundBadge ? `${refundBadge} לאישור` : 'אין חדשים') : (myRefunds ? `${myRefunds} בטיפול` : 'העלאת קבלה') },
+    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'עם סיסמה', locked: !isAdmin, wide: true },
   ]
 
   return (
-    <div className="page-in">
+    <div className="page-in flex min-h-[100dvh] flex-col">
       <header className="pt-safe bg-gradient-to-b from-navy-800 to-navy-700 px-5 pb-16 text-white dark:from-navy-900 dark:to-navy-900">
         <div className="mx-auto flex max-w-md items-center justify-between pt-5">
           <div>
@@ -62,7 +69,7 @@ export default function Home({ profile }) {
         </div>
       </header>
 
-      <main className="mx-auto -mt-11 max-w-md px-4 pb-28">
+      <main className="relative mx-auto -mt-11 flex w-full max-w-md flex-1 flex-col px-4" style={{ paddingBottom: 'calc(84px + env(safe-area-inset-bottom))' }}>
         <NotifBanner />
         {a && (
           <Link to="/announcements"
@@ -77,7 +84,7 @@ export default function Home({ profile }) {
             </div>
           </Link>
         )}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid flex-1 grid-cols-3 gap-2.5" style={{ gridTemplateRows: 'repeat(3, minmax(96px, 1fr)) auto' }}>
           {tiles.map((t) => <Tile key={t.id} tile={t} />)}
         </div>
       </main>

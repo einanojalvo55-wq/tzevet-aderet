@@ -15,7 +15,8 @@ export const seedContacts = [
 export const seedSettings = {
   tribes: ['זרעים', 'נבטים', 'ניצנים', 'מעלות', 'מעפילים', 'הראה', 'שם חדש'],
   rooms: ['החדר הגדול', 'החדר מצד שמאל לכניסה', 'החדר מצד ימין לכניסה', 'מגרש'],
-  speakerApproval: false, // כל אחד יכול לקחת כשהרמקול פנוי
+  speakerApproval: false,
+  refundsManager: 'נועה הדר', // מי מאשרת ומחזירה כסף
 }
 
 export const EVENT_TYPES = {

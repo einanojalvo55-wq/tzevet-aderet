@@ -5,7 +5,7 @@ import PageHeader from '../components/PageHeader'
 import { useNotifications, useNotifSeen, useAdmin, isForMe } from '../data/hooks'
 import { timeAgo } from '../data/dates'
 
-const kindIcon = { announcement: 'Megaphone', important: 'Pin', event: 'CalendarDays', room: 'DoorOpen', speaker: 'Speaker', report: 'ClipboardList' }
+const kindIcon = { announcement: 'Megaphone', important: 'Pin', event: 'CalendarDays', room: 'DoorOpen', speaker: 'Speaker', report: 'ClipboardList', refund: 'Receipt' }
 
 export default function Notifications({ profile }) {
   const [list] = useNotifications()

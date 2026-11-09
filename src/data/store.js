@@ -5,7 +5,7 @@ import { online, db, ready } from '../firebase'
 // מאגר הנתונים של האפליקציה.
 // נתונים משותפים (הודעות, אירועים...) מסונכרנים בזמן אמת דרך השרת לכל הטלפונים.
 // נתונים אישיים (מה קראתי, הגדרות התראות) נשמרים רק בטלפון.
-const SHARED = new Set(['announcements', 'contacts', 'settings', 'events', 'speakerLoans', 'roomBookings', 'reports', 'notifications', 'links'])
+const SHARED = new Set(['announcements', 'contacts', 'settings', 'events', 'speakerLoans', 'roomBookings', 'reports', 'notifications', 'links', 'refunds'])
 const PREFIX = 'tzevet-aderet:'
 const listeners = new Set()
 const cache = {}

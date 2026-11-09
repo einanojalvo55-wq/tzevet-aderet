@@ -14,6 +14,7 @@ import Reports from './pages/Reports'
 import Notifications from './pages/Notifications'
 import Team from './pages/Team'
 import Links from './pages/Links'
+import Refunds from './pages/Refunds'
 import { online, watchMyUser, saveUser } from './firebase'
 import { loadProfile, saveProfile, clearProfile } from './data/profile'
 import { useEvents, useLoans, useAdmin, fullName, notify } from './data/hooks'
@@ -99,6 +100,7 @@ export default function App() {
         <Route path="/profile" element={<Profile profile={profile} onSave={save} onReset={() => { clearProfile(); setProfile(null) }} />} />
         <Route path="/admin" element={<Admin alwaysAdmin={alwaysAdmin} />} />
         <Route path="/links" element={<Links />} />
+        <Route path="/refunds" element={<Refunds profile={profile} />} />
         <Route path="/team" element={<Team profile={profile} />} />
       </Routes>
       <BottomNav profile={profile} />

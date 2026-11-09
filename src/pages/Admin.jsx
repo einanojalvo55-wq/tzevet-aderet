@@ -4,6 +4,8 @@ import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import { field, primaryBtn } from '../components/Sheet'
 import { saveUser } from '../firebase'
+import { useTeam } from '../data/team'
+import { loadProfile } from '../data/profile'
 import { useAdmin, useSettings, useReports, useLoans, useEvents } from '../data/hooks'
 import { todayISO } from '../data/dates'
 import { ADMIN_PASSWORD } from '../data/seed'
@@ -90,6 +92,7 @@ function AdminPanel({ onExit }) {
     { to: '/reports', icon: 'ClipboardList', title: 'טיפול בדיווחים' },
     { to: '/contacts', icon: 'Phone', title: 'עריכת מספרים חשובים' },
     { to: '/links', icon: 'Link', title: 'עריכת קישורים חשובים' },
+    { to: '/refunds', icon: 'Receipt', title: 'החזרים כספיים' },
   ]
   return (
     <div className="page-in mx-auto max-w-md space-y-4 px-4 pb-28">
@@ -123,6 +126,8 @@ function AdminPanel({ onExit }) {
         <span className={`flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition ${settings.speakerApproval ? 'justify-start bg-emerald-500' : 'justify-end bg-slate-300 dark:bg-white/20'}`}><span className="h-5 w-5 rounded-full bg-white shadow" /></span>
       </button>
 
+      <RefundsManagerPicker settings={settings} setSettings={setSettings} />
+
       <ListEditor title="שבטים (לפי הסדר: הראשון כיתה ג׳, השני ד׳...)" items={settings.tribes} onChange={(tribes) => setSettings({ ...settings, tribes })} placeholder="שם שבט חדש" />
       <ListEditor title="חדרים בסניף" items={settings.rooms} onChange={(rooms) => setSettings({ ...settings, rooms })} placeholder="שם חדר חדש" />
 
@@ -134,6 +139,22 @@ function AdminPanel({ onExit }) {
       {onExit && <button onClick={onExit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 font-bold text-rose-600 shadow-card dark:bg-navy-900">
         <Icon name="Unlock" size={18} /> יציאה ממצב ניהול
       </button>}
+    </div>
+  )
+}
+
+// מי מאשרת ומחזירה כסף על קבלות
+function RefundsManagerPicker({ settings, setSettings }) {
+  const team = useTeam(loadProfile() || { firstName: '', lastName: '' }) || []
+  const current = settings.refundsManager ?? 'נועה הדר'
+  const names = [...new Set([current, ...team.map((u) => `${u.firstName} ${u.lastName}`.trim())])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'he'))
+  return (
+    <div className="rounded-3xl bg-white p-4 shadow-card dark:bg-navy-900">
+      <div className="mb-2 flex items-center gap-2 font-extrabold"><Icon name="Receipt" size={18} className="text-emerald-600" />מי מאשרת החזרים כספיים</div>
+      <select className={`${field} py-2.5`} value={current} onChange={(e) => setSettings({ ...settings, refundsManager: e.target.value })}>
+        {names.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+      <p className="mt-1.5 text-xs text-slate-500">היא מקבלת התראה על כל קבלה, ורואה את כל הבקשות</p>
     </div>
   )
 }

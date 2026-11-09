@@ -84,7 +84,7 @@ export default function Reports({ profile }) {
 }
 
 // מקטין תמונה לפני השמירה כדי שלא תתפוס הרבה מקום
-function shrink(file) {
+export function shrink(file) {
   return new Promise((res) => {
     const img = new Image()
     img.onload = () => {
