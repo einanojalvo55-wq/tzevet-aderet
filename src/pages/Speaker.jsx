@@ -20,14 +20,18 @@ export const SPEAKER_TERMS = [
   'בלי מכות ובלי שריטות. שומרים עליו כמו על שלך.',
 ]
 
-// מצב הרמקול כרגע: אצל מישהו / שמור / פנוי
+// מצב הרמקול כרגע: אצל מישהו / שמור עכשיו (בשעות שהזמינו) / פנוי
 export function speakerStatus(loans) {
+  const now = Date.now()
   const active = loans.find((l) => l.status === 'active')
   if (active) return { kind: 'out', loan: active, label: `אצל ${active.user}`, color: 'rose' }
-  const next = loans.filter((l) => l.status === 'approved').sort((a, b) => a.from - b.from)[0]
-  if (next) return { kind: 'reserved', loan: next, label: `שמור ל${next.user}`, color: 'amber' }
+  const nowRes = loans.find((l) => l.status === 'approved' && l.from <= now && now < l.to)
+  if (nowRes) return { kind: 'reserved', loan: nowRes, label: `שמור ל${nowRes.user}`, color: 'amber' }
   return { kind: 'free', label: 'פנוי', color: 'green' }
 }
+
+// הזמנות עתידיות (מאושרות או מחכות), מהקרובה לרחוקה
+export const upcomingLoans = (loans) => loans.filter((l) => ['approved', 'pending'].includes(l.status) && l.to > Date.now() && !(l.status === 'approved' && l.from <= Date.now())).sort((a, b) => a.from - b.from)
 
 // טווח הזמן שבו הרמקול תפוס בגלל השאלה מסוימת
 const span = (l) => ({ from: l.status === 'active' ? Math.min(l.takenAt || l.from, l.from) : l.from, to: Math.max(l.to, l.status === 'active' ? Date.now() : 0) })
@@ -91,6 +95,20 @@ export default function Speaker({ profile }) {
           <img src={speakerImg} alt="הרמקול" className="h-32 w-32 shrink-0 object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,.35)]" />
         </div>
       </div>
+
+      {upcomingLoans(loans).length > 0 && (
+        <div className="mt-3 rounded-3xl bg-white p-4 shadow-card dark:bg-navy-900">
+          <div className="mb-1.5 text-sm font-extrabold text-slate-500">הזמנות קרובות (בשאר הזמן הרמקול פנוי)</div>
+          {upcomingLoans(loans).slice(0, 5).map((l) => (
+            <div key={l.id} className="flex items-center gap-2 py-1 text-sm">
+              <Icon name="Clock" size={14} className="shrink-0 text-amber-500" />
+              <span className="font-bold">{l.user}</span>
+              <span className="text-slate-500">{fmtDateTime(l.from)} עד {fmtDateTime(l.to)}</span>
+              {l.status === 'pending' && <span className="rounded-full bg-amber-100 px-1.5 text-[11px] font-bold text-amber-800">מחכה</span>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {myOpen.map((l) => (
         <div key={l.id} className="mt-3 rounded-3xl bg-white p-4 shadow-card dark:bg-navy-900">

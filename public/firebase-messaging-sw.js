@@ -8,6 +8,7 @@ if (config) {
   firebase.initializeApp(config)
   const messaging = firebase.messaging()
   messaging.onBackgroundMessage((payload) => {
+    if (payload.notification) return // כבר מוצגת אוטומטית
     const d = payload.data || {}
     self.registration.showNotification(d.title || 'צוות אדרת', {
       body: d.body || '',
