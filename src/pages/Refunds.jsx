@@ -11,6 +11,7 @@ import { online, saveImage } from '../firebase'
 import { shrink } from './Reports'
 import PhotoViewer from '../components/PhotoViewer'
 import PasswordSheet from '../components/PasswordSheet'
+import { waLink } from '../data/team'
 
 // החזרים כספיים: מדריך קנה משהו לצוות, מעלה קבלה, והאחראית מאשרת ומחזירה את הכסף
 const STATUS = { pending: 'מחכה לאישור', approved: 'אושר, מחכה להחזר', paid: 'הכסף הוחזר ✓', rejected: 'נדחה' }
@@ -114,7 +115,7 @@ export default function Refunds({ profile }) {
             </div>
             {isManager && r.status === 'pending' && (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button onClick={() => withPassword(r, 'approved')} className="rounded-xl bg-emerald-500 py-2.5 font-bold text-white active:scale-95">אישור</button>
+                <button onClick={() => withPassword(r, 'approved')} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white active:scale-95"><Icon name="MessageCircle" size={16} />אישור ושליחה בוואטסאפ</button>
                 <button onClick={() => withPassword(r, 'rejected')} className="rounded-xl bg-slate-100 py-2.5 font-bold active:scale-95 dark:bg-white/10">דחייה</button>
               </div>
             )}
@@ -127,7 +128,7 @@ export default function Refunds({ profile }) {
 
       {writing && <RefundForm kind={writing} onClose={() => setWriting(null)} onSend={send} />}
       <PhotoViewer src={photo} onClose={() => setPhoto(null)} />
-      {confirmAct && <PasswordSheet title={{ approved: 'אישור הבקשה', rejected: 'דחיית הבקשה', paid: 'סימון שהכסף הוחזר' }[confirmAct.status]} onClose={() => setConfirmAct(null)} onOk={() => { setStatus(confirmAct.r, confirmAct.status); setConfirmAct(null) }} />}
+      {confirmAct && <PasswordSheet title={{ approved: 'אישור הבקשה', rejected: 'דחיית הבקשה', paid: 'סימון שהכסף הוחזר' }[confirmAct.status]} onClose={() => setConfirmAct(null)} onOk={() => { const { r, status } = confirmAct; setStatus(r, status); setConfirmAct(null); if (status === 'approved') window.open(waLink(r.phone, approvedMessage(r)), '_blank') }} />}
     </div>
   )
 }
@@ -162,4 +163,30 @@ function RefundForm({ kind, onClose, onSend }) {
       </div>
     </Sheet>
   )
+}
+
+// הודעת וואטסאפ אוטומטית אחרי אישור
+function approvedMessage(r) {
+  const first = (r.by || '').split(' ')[0]
+  const date = r.date ? ` (${fmtShort(r.date)})` : ''
+  if (r.kind === 'budget') return [
+    `היי ${first}! 👋`,
+    `בקשת התקציב שלך אושרה ✅`,
+    '',
+    `💰 ${money(r.amount)} ל${r.what}${date}`,
+    '',
+    'אחרי שקונים, שמרו את הקבלה והעלו אותה באפליקציה ב"בקשת החזר" 🧾',
+  ].join('\n')
+  return [
+    `היי ${first}! 👋`,
+    `בקשת ההחזר שלך אושרה ✅`,
+    '',
+    `🧾 ${money(r.amount)} על ${r.what}${date}`,
+    '',
+    'כדי שאוכל להעביר לך את הכסף, שלח/י לי בבקשה אחד מאלה:',
+    '📱 מספר טלפון לביט / פייבוקס',
+    '🏦 או פרטי חשבון בנק (שם בעל החשבון, בנק, סניף ומספר חשבון)',
+    '',
+    'ההעברה תתבצע בימים הקרובים 🙏',
+  ].join('\n')
 }
