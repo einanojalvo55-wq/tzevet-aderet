@@ -53,7 +53,7 @@ export default function Home({ profile }) {
     { id: 'contacts', title: 'מספרים', icon: 'Phone', color: 'rose', sub: 'מספרים חשובים' },
     { id: 'links', title: 'קישורים', icon: 'Link', color: 'sky', sub: 'טפסים ואתרים' },
     { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים' },
-    { id: 'refunds', title: 'החזרים', icon: 'Receipt', color: 'green', badge: refundBadge, sub: refundMgr ? (refundBadge ? `${refundBadge} לאישור` : 'אין חדשים') : (myRefunds ? `${myRefunds} בטיפול` : 'העלאת קבלה') },
+    { id: 'refunds', title: 'כספים', icon: 'Wallet', color: 'green', badge: refundBadge, sub: refundMgr ? (refundBadge ? `${refundBadge} לאישור` : 'אין חדשים') : (myRefunds ? `${myRefunds} בטיפול` : 'החזר ותקציב') },
     { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'עם סיסמה', locked: !isAdmin, wide: true },
   ]
 

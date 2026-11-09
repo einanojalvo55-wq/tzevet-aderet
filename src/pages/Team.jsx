@@ -75,7 +75,7 @@ function TribeEditor({ user, tribes, onClose }) {
   return (
     <Sheet title={`איזה שבט ${user.firstName} מדריך/ה?`} onClose={onClose}>
       <div className="space-y-4">
-        <Chips cols={2} options={tribes.map((t) => ({ value: t, label: gradeOf(t) ? `${t} · ${gradeOf(t)}` : t }))} value={tribe} onChange={setTribe} small />
+        <Chips cols={2} options={[...tribes, 'קומונרית'].map((t) => ({ value: t, label: t === 'קומונרית' ? '👑 קומונרית (מנהלת)' : gradeOf(t) ? `${t} · ${gradeOf(t)}` : t }))} value={tribe} onChange={setTribe} small />
         <button disabled={busy || tribe === user.tribe} onClick={save} className={primaryBtn}>{busy ? 'שומר...' : 'שמירה'}</button>
         <p className="text-center text-xs text-slate-400">השינוי יופיע גם בטלפון של {user.firstName}</p>
       </div>
