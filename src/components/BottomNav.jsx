@@ -19,13 +19,11 @@ export default function BottomNav({ profile }) {
         {tabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.to === '/'}
             className={({ isActive }) => `relative flex flex-col items-center gap-1 py-1 text-[11px] font-medium transition ${isActive ? 'text-navy-600 dark:text-accent-400' : 'text-slate-400'}`}>
-            {({ isActive }) => (<>
-            <span className={`relative grid h-8 w-14 place-items-center rounded-full transition ${isActive ? 'bg-navy-100 dark:bg-accent-500/15' : ''}`}>
-              <Icon name={t.icon} size={22} />
-              {t.badge > 0 && <span className="absolute left-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent-500 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-navy-950">{t.badge}</span>}
+            <span className="relative">
+              <Icon name={t.icon} size={24} />
+              {t.badge > 0 && <span className="absolute -left-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent-500 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-navy-950">{t.badge}</span>}
             </span>
             {t.label}
-            </>)}
           </NavLink>
         ))}
       </div>

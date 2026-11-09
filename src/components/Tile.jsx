@@ -1,32 +1,32 @@
 import { Link } from 'react-router-dom'
 import Icon from './Icon'
-import { tint, solid } from './colors'
+import { tone } from './colors'
 
-// ריבוע צבעוני במסך הבית (שלושה בשורה, כדי שהכול ייכנס במסך אחד)
 export default function Tile({ tile }) {
   return (
     <Link
       to={`/${tile.id}`}
-      className={`relative flex flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[22px] bg-gradient-to-br px-1 py-3 text-center [@media(max-height:620px)]:gap-1 [@media(max-height:620px)]:py-2 shadow-card ring-1 ring-slate-900/5 transition active:scale-[.96] dark:ring-white/5 ${tint[tile.color]}`}
+      className={`relative flex gap-3 rounded-3xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 transition active:scale-[.97] dark:bg-navy-900 dark:ring-white/5 ${tile.wide ? 'col-span-2 flex-row items-center' : 'flex-col'}`}
     >
-      <div className={`grid h-12 w-12 place-items-center rounded-2xl text-white shadow-md [@media(max-height:620px)]:h-10 [@media(max-height:620px)]:w-10 ${solid[tile.color]}`}>
+      <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${tone[tile.color]}`}>
         <Icon name={tile.icon} size={24} />
       </div>
-      <div className="flex items-center gap-1 text-[14px] font-extrabold leading-tight">
-        {tile.title}
-        {tile.locked && <Icon name="Lock" size={11} className="text-slate-400" />}
-      </div>
-      {tile.sub && (
-        <div className="flex max-w-full items-center gap-1 truncate px-1 text-[11px] leading-tight text-slate-500 dark:text-slate-400 [@media(max-height:620px)]:hidden">
-          {tile.dot && <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[tile.dot]}`} />}
-          <span className="truncate">{tile.sub}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 text-[17px] font-bold">
+          {tile.title}
+          {tile.locked && <Icon name="Lock" size={14} className="text-slate-400" />}
         </div>
-      )}
+        <div className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500 dark:text-slate-400">
+          {tile.dot && <span className={`h-2 w-2 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[tile.dot]}`} />}
+          {tile.sub}
+        </div>
+      </div>
       {tile.badge > 0 && (
-        <span className="absolute left-2 top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent-500 px-1 text-[11px] font-bold text-white shadow">
+        <span className="absolute left-3 top-3 grid h-6 min-w-6 place-items-center rounded-full bg-accent-500 px-1.5 text-xs font-bold text-white">
           {tile.badge}
         </span>
       )}
+      {tile.wide && <Icon name="ChevronLeft" size={20} className="text-slate-400" />}
     </Link>
   )
 }
