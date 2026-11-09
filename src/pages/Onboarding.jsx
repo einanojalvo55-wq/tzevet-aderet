@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Logo from '../components/Logo'
 import { useSettings, useGradeOf } from '../data/hooks'
+import { ADMIN_PASSWORD, KOMUNARIT } from '../data/seed'
 
 const field = 'w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[17px] outline-none transition focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20 dark:border-white/10 dark:bg-navy-950'
 
@@ -10,16 +11,20 @@ export default function Onboarding({ initial, onDone, onCancel, lockTribe }) {
   const [tribe, setTribe] = useState(initial?.tribe || '')
   const [phone, setPhone] = useState(initial?.phone || '')
   const [tried, setTried] = useState(false)
+  const [pw, setPw] = useState('')
   const [{ tribes: TRIBES }] = useSettings()
   const gradeOf = useGradeOf()
   const phoneOk = phone.replace(/\D/g, '').length >= 9
-  const ok = firstName.trim() && lastName.trim() && tribe && phoneOk
+  const isKom = tribe === KOMUNARIT
+  // קומונרית צריכה סיסמה (אלא אם כבר רשומה כקומונרית ורק עורכת פרטים)
+  const pwOk = !isKom || initial?.tribe === KOMUNARIT || pw.trim() === ADMIN_PASSWORD
+  const ok = firstName.trim() && lastName.trim() && tribe && phoneOk && pwOk
 
   function submit(e) {
     e.preventDefault()
     setTried(true)
     if (!ok) return
-    onDone({ firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), tribe, role: initial?.role || 'member', createdAt: initial?.createdAt || Date.now() })
+    onDone({ firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), tribe, role: isKom ? 'admin' : (initial?.role === 'admin' ? 'admin' : 'member'), createdAt: initial?.createdAt || Date.now() })
   }
 
   return (
@@ -49,7 +54,7 @@ export default function Onboarding({ initial, onDone, onCancel, lockTribe }) {
             <div className="rounded-2xl bg-slate-100 px-4 py-3 font-semibold dark:bg-white/5">{tribe} {gradeOf(tribe) && `(${gradeOf(tribe)})`} <span className="text-xs font-normal text-slate-500">· רק מנהל יכול לשנות</span></div>
           ) : (
           <div className="grid grid-cols-3 gap-2">
-            {TRIBES.map((t) => (
+            {[...TRIBES, KOMUNARIT].map((t) => (
               <button type="button" key={t} onClick={() => setTribe(t)}
                 className={`rounded-2xl py-3 text-[15px] font-semibold transition active:scale-95 ${tribe === t ? 'bg-navy-700 text-white shadow-md dark:bg-accent-500 dark:text-navy-950' : 'bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-slate-300'}`}>
                 {t}{gradeOf(t) && <span className="block text-[11px] font-normal opacity-75">{gradeOf(t)}</span>}
@@ -58,7 +63,14 @@ export default function Onboarding({ initial, onDone, onCancel, lockTribe }) {
           </div>
           )}
         </div>
-        {tried && !ok && <p className="text-sm font-medium text-rose-600">צריך למלא שם פרטי, שם משפחה, מספר טלפון תקין ולבחור שבט</p>}
+        {isKom && initial?.tribe !== KOMUNARIT && (
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold">סיסמת קומונרית</span>
+            <input className={`${field} text-center`} type="password" inputMode="numeric" value={pw} onChange={(e) => setPw(e.target.value)} />
+            {pw && !pwOk && <span className="mt-1 block text-sm font-medium text-rose-600">סיסמה שגויה</span>}
+          </label>
+        )}
+        {tried && !ok && <p className="text-sm font-medium text-rose-600">{isKom && !pwOk ? 'צריך סיסמה נכונה כדי להירשם כקומונרית' : 'צריך למלא שם פרטי, שם משפחה, מספר טלפון תקין ולבחור שבט'}</p>}
         <button className="w-full rounded-2xl bg-accent-500 py-4 text-lg font-bold text-white shadow-md transition active:scale-[.98]">
           {initial?.phone ? 'שמירה' : 'יצירת פרופיל'}
         </button>

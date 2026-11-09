@@ -33,7 +33,7 @@ export default function Team({ profile }) {
       <PageHeader title="הצוות" />
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש לפי שם או טלפון"
         className="mb-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-navy-500 dark:border-white/10 dark:bg-navy-900" />
-      <Chips small options={[{ value: 'all', label: 'כולם' }, ...tribes.map((t) => ({ value: t, label: gradeOf(t) ? `${t} · ${gradeOf(t).replace('כיתה ', '')}` : t }))]} value={filter} onChange={setFilter} />
+      <Chips small options={[{ value: 'all', label: 'כולם' }, ...[...tribes, 'קומונרית'].map((t) => ({ value: t, label: gradeOf(t) ? `${t} · ${gradeOf(t).replace('כיתה ', '')}` : t }))]} value={filter} onChange={setFilter} />
       {!online && <p className="mt-3 px-1 text-sm text-slate-500">אחרי החיבור לשרת יופיעו כאן כל אנשי הצוות. כרגע מופיע רק הפרופיל שלך.</p>}
       {team === null ? <p className="mt-10 text-center text-slate-400">טוען...</p> : (
         <>

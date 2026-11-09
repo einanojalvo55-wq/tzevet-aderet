@@ -6,14 +6,14 @@ import { field, primaryBtn } from '../components/Sheet'
 import { saveUser } from '../firebase'
 import { useAdmin, useSettings, useReports, useLoans, useEvents } from '../data/hooks'
 import { todayISO } from '../data/dates'
+import { ADMIN_PASSWORD } from '../data/seed'
 
 // סיסמת המנהלים (אפשר להחליף כאן)
-const ADMIN_PASSWORD = '23235'
 const LOCK_KEY = 'tzevet-aderet:adminLock'
 const getLock = () => { try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || { fails: 0, until: 0 } } catch { return { fails: 0, until: 0 } } }
 const setLock = (v) => { try { localStorage.setItem(LOCK_KEY, JSON.stringify(v)) } catch { /* */ } }
 
-export default function Admin() {
+export default function Admin({ alwaysAdmin }) {
   const [isAdmin, setAdmin] = useAdmin()
   const [pw, setPw] = useState('')
   const [err, setErr] = useState('')
@@ -45,7 +45,7 @@ export default function Admin() {
     </div>
   )
 
-  return <AdminPanel onExit={() => { setAdmin(false); saveUser({ isAdmin: false }).catch(() => {}) }} />
+  return <AdminPanel onExit={alwaysAdmin ? null : () => { setAdmin(false); saveUser({ isAdmin: false }).catch(() => {}) }} />
 }
 
 function ListEditor({ title, items, onChange, placeholder }) {
@@ -131,9 +131,9 @@ function AdminPanel({ onExit }) {
         <div className="flex-1"><div className="font-extrabold">אנשי הצוות</div><div className="text-sm text-slate-500">רשימת כל מי שנרשם, והסרה של מי שלא שייך</div></div>
         <Icon name="ChevronLeft" size={18} className="text-slate-400" />
       </Link>
-      <button onClick={onExit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 font-bold text-rose-600 shadow-card dark:bg-navy-900">
+      {onExit && <button onClick={onExit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 font-bold text-rose-600 shadow-card dark:bg-navy-900">
         <Icon name="Unlock" size={18} /> יציאה ממצב ניהול
-      </button>
+      </button>}
     </div>
   )
 }

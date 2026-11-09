@@ -14,9 +14,10 @@ import Reports from './pages/Reports'
 import Notifications from './pages/Notifications'
 import Team from './pages/Team'
 import Links from './pages/Links'
-import { online, watchMyUser } from './firebase'
+import { online, watchMyUser, saveUser } from './firebase'
 import { loadProfile, saveProfile, clearProfile } from './data/profile'
-import { useEvents, useLoans, fullName, notify } from './data/hooks'
+import { useEvents, useLoans, useAdmin, fullName, notify } from './data/hooks'
+import { KOMUNARIT } from './data/seed'
 import { useStore } from './data/store'
 import { eventTime } from './data/dates'
 
@@ -62,6 +63,12 @@ function ScrollToTop() {
 export default function App() {
   const [profile, setProfile] = useState(loadProfile)
   const save = (p) => { saveProfile(p); setProfile(p) }
+  const [isAdmin, setAdmin] = useAdmin()
+  // קומונרית (או מי שנרשם כמנהל) היא תמיד מנהלת
+  const alwaysAdmin = profile?.tribe === KOMUNARIT || profile?.role === 'admin'
+  useEffect(() => {
+    if (alwaysAdmin && !isAdmin) { setAdmin(true); saveUser({ isAdmin: true }).catch(() => {}) }
+  }, [alwaysAdmin, isAdmin]) // eslint-disable-line react-hooks/exhaustive-deps
   useReminders(profile)
 
   // מי שנרשם לפני שהוספנו טלפון מתבקש להשלים אותו
@@ -90,7 +97,7 @@ export default function App() {
         <Route path="/reports" element={<Reports profile={profile} />} />
         <Route path="/notifications" element={<Notifications profile={profile} />} />
         <Route path="/profile" element={<Profile profile={profile} onSave={save} onReset={() => { clearProfile(); setProfile(null) }} />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<Admin alwaysAdmin={alwaysAdmin} />} />
         <Route path="/links" element={<Links />} />
         <Route path="/team" element={<Team profile={profile} />} />
       </Routes>

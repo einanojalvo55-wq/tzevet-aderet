@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
-import { solid, tone } from '../components/colors'
+import Tile from '../components/Tile'
 import Logo from '../components/Logo'
 import NotifBanner from '../components/NotifBanner'
 import { useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
@@ -39,79 +39,51 @@ export default function Home({ profile }) {
   const pendingLoans = isAdmin ? loans.filter((l) => l.status === 'pending').length : 0
 
   const tiles = [
-    { id: 'announcements', title: 'הודעות', icon: 'Megaphone', color: 'blue', badge: unread, sub: unread ? `${unread} לא נקראו` : 'הכול נקרא' },
-    { id: 'events', title: 'אירועים', icon: 'CalendarDays', color: 'violet', sub: next ? `${next.title} · ${relDay(next.date)}` : 'אין אירועים קרובים' },
-    { id: 'rooms', title: 'חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`}` : 'הזמנת חדר פנוי' },
+    { id: 'announcements', title: 'הודעות', icon: 'Megaphone', color: 'blue', badge: unread, sub: unread ? `${unread} חדשות` : 'הכול נקרא' },
+    { id: 'events', title: 'אירועים', icon: 'CalendarDays', color: 'violet', sub: next ? relDay(next.date) : 'אין קרובים' },
+    { id: 'rooms', title: 'חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`}` : 'הזמנת חדר' },
     { id: 'speaker', title: 'רמקול', icon: 'Speaker', color: 'green', sub: sp.label, dot: sp.color, badge: pendingLoans },
-    { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין דיווחים פתוחים' },
-    { id: 'contacts', title: 'מספרים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
-    { id: 'links', title: 'קישורים', icon: 'Link', color: 'sky', sub: 'טפסים, אתרים ומסמכים' },
-    { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים והטלפונים' },
-    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'כניסה עם סיסמה', locked: !isAdmin },
+    { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין פתוחים' },
+    { id: 'contacts', title: 'מספרים', icon: 'Phone', color: 'rose', sub: 'חשובים' },
+    { id: 'links', title: 'קישורים', icon: 'Link', color: 'sky', sub: 'טפסים ואתרים' },
+    { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים' },
+    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'פעיל' : 'עם סיסמה', locked: !isAdmin },
   ]
 
   return (
     <div className="page-in">
-      <header className="pt-safe relative overflow-hidden bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-5 pb-16 text-white">
+      <header className="pt-safe relative overflow-hidden bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-5 pb-14 text-white">
         <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-accent-500/15 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-20 right-10 h-48 w-48 rounded-full bg-sky-400/10 blur-2xl" />
-        <div className="relative mx-auto flex max-w-md items-center justify-between pt-5">
+        <div className="relative mx-auto flex max-w-md items-center justify-between pt-3">
           <div>
             <div className="text-sm font-semibold text-accent-400">צוות אדרת</div>
-            <h1 className="text-[26px] font-extrabold leading-tight">{greeting()}, {profile.firstName} 👋</h1>
-            <div className="mt-0.5 text-sm text-navy-100/80">{new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+            <h1 className="text-[24px] font-extrabold leading-tight">{greeting()}, {profile.firstName} 👋</h1>
+            <div className="mt-0.5 text-sm text-navy-100/80 [@media(max-height:620px)]:hidden">{new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
           </div>
-          <Logo className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/20" />
+          <Logo className="h-12 w-12 rounded-2xl shadow-lg ring-1 ring-white/20" />
         </div>
       </header>
 
-      <main className="relative mx-auto -mt-11 max-w-md px-4 pb-28">
+      <main className="relative mx-auto -mt-10 max-w-md px-4 pb-28">
         <NotifBanner />
         {a && (
           <Link to="/announcements"
-            className={`mb-4 flex items-start gap-3 rounded-3xl bg-white p-4 shadow-card transition active:scale-[.98] dark:bg-navy-900 ${!readIds.includes(a.id) ? 'ring-2 ring-accent-500' : 'ring-1 ring-slate-900/5 dark:ring-white/5'}`}>
+            className={`mb-3 flex items-center gap-3 rounded-3xl bg-white px-4 py-3 shadow-card transition active:scale-[.98] dark:bg-navy-900 ${!readIds.includes(a.id) ? 'ring-2 ring-accent-500' : 'ring-1 ring-slate-900/5 dark:ring-white/5'}`}>
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-accent-500 text-white"><Icon name="Megaphone" size={20} /></div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 text-xs font-semibold text-accent-600 dark:text-accent-400">
                 הודעה אחרונה {a.important && <span className="rounded-full bg-accent-500/15 px-2 py-0.5">חשוב</span>}
               </div>
-              <div className="mt-0.5 font-bold leading-snug">{a.title}</div>
-              {a.body && <div className="mt-0.5 line-clamp-1 text-sm text-slate-500 dark:text-slate-400">{a.body}</div>}
+              <div className="truncate font-bold leading-snug">{a.title}</div>
+              
             </div>
           </Link>
         )}
-        <div className="grid grid-cols-3 gap-x-2 gap-y-4 rounded-3xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 dark:bg-navy-900 dark:ring-white/5">
-          {tiles.map((t) => (
-            <Link key={t.id} to={`/${t.id}`} className="relative flex flex-col items-center gap-1.5 rounded-2xl py-1 transition active:scale-95">
-              <span className={`grid h-14 w-14 place-items-center rounded-[18px] text-white shadow-md ${solid[t.color]}`}><Icon name={t.icon} size={26} /></span>
-              <span className="text-[13px] font-bold">{t.title}</span>
-              {t.badge > 0 && <span className="absolute right-2 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-accent-500 px-1 text-[11px] font-bold text-white ring-2 ring-white dark:ring-navy-900">{t.badge}</span>}
-              {t.locked && <Icon name="Lock" size={12} className="absolute left-3 top-1 text-slate-400" />}
-            </Link>
-          ))}
+        <div className="grid grid-cols-3 gap-2.5">
+          {tiles.map((t) => <Tile key={t.id} tile={t} />)}
         </div>
-        {/* היום: מה הכי חשוב עכשיו, בשורה אחת לכל דבר */}
-        <section className="mt-4 overflow-hidden rounded-3xl bg-white shadow-card ring-1 ring-slate-900/5 dark:bg-navy-900 dark:ring-white/5">
-          <div className="px-4 pt-3 text-xs font-bold text-slate-400">מה קורה</div>
-          <TodayRow to="/events" icon="CalendarDays" color="violet" title={next ? next.title : 'אין אירועים קרובים'} sub={next ? `${relDay(next.date)}${next.time ? ` · ${next.time}` : ''}` : ''} />
-          <TodayRow to="/rooms" icon="DoorOpen" color="teal" title={mine ? mine.room : 'אין לך הזמנת חדר'} sub={mine ? `${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`} · \u200E${mine.from}–${mine.to}` : 'אפשר להזמין חדר פנוי'} />
-          <TodayRow to="/speaker" icon="Speaker" color="green" title={`רמקול: ${sp.label}`} dot={sp.color} last />
-        </section>
-
       </main>
     </div>
-  )
-}
-
-function TodayRow({ to, icon, color, title, sub, dot, last }) {
-  return (
-    <Link to={to} className={`flex items-center gap-3 px-4 py-3 active:bg-slate-50 dark:active:bg-white/5 ${last ? '' : 'border-b border-slate-100 dark:border-white/5'}`}>
-      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone[color]}`}><Icon name={icon} size={18} /></span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 truncate font-bold">{dot && <span className={`h-2 w-2 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[dot]}`} />}{title}</span>
-        {sub && <span className="block truncate text-xs text-slate-500 dark:text-slate-400">{sub}</span>}
-      </span>
-      <Icon name="ChevronLeft" size={18} className="shrink-0 text-slate-300" />
-    </Link>
   )
 }

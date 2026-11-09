@@ -36,3 +36,7 @@ export const seedBookings = []
 
 // הכיתה של כל שבט, לפי הסדר ברשימת השבטים (הראשון = ג׳)
 export const GRADES = ['ג׳', 'ד׳', 'ה׳', 'ו׳', 'ז׳', 'ח׳', 'ט׳', 'י׳', 'י״א', 'י״ב']
+
+// סיסמת המנהלים, ומי שנרשם כ"קומונרית" הוא תמיד מנהל
+export const ADMIN_PASSWORD = '23235'
+export const KOMUNARIT = 'קומונרית'
