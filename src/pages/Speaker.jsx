@@ -6,6 +6,7 @@ import { useLoans, useAdmin, useSettings, fullName, notify } from '../data/hooks
 import { fmtDateTime } from '../data/dates'
 import { newId } from '../data/store'
 import speakerImg from '../assets/speaker.png'
+import { useTeam, waLink } from '../data/team'
 
 // למי מחזירים את הרמקול
 export const SPEAKER_HOME = 'עינן'
@@ -46,6 +47,7 @@ export default function Speaker({ profile }) {
   const [isAdmin] = useAdmin()
   const [{ speakerApproval }] = useSettings()
   const [asking, setAsking] = useState(false)
+  const team = useTeam(profile)
   const me = fullName(profile)
   const st = speakerStatus(loans)
   const update = (id, patch) => setLoans((l) => l.map((x) => x.id === id ? { ...x, ...patch } : x))
@@ -59,9 +61,14 @@ export default function Speaker({ profile }) {
     if (speakerApproval) notify({ text: `${me} מבקש/ת את הרמקול: ${r.purpose}`, kind: 'speaker', to: 'admins', link: '/speaker' })
     setAsking(false)
   }
+  // הטלפון של מי שביקש: שמור בבקשה, ואם לא, לפי רשימת הצוות
+  const phoneOf = (l) => l.phone || (team || []).find((u) => `${u.firstName} ${u.lastName}` === l.user)?.phone || ''
+  // אחרי אישור: נפתח וואטסאפ עם הודעה מוכנה למי שביקש
+  const sendApproval = (l) => window.open(waLink(phoneOf(l), approvalMessage(l)), '_blank')
   const decide = (l, ok) => {
     update(l.id, { status: ok ? 'approved' : 'rejected' })
     notify({ text: ok ? 'הבקשה שלך לרמקול אושרה ✓' : 'הבקשה שלך לרמקול נדחתה', kind: 'speaker', to: l.user, link: '/speaker' })
+    if (ok) sendApproval(l)
   }
   const take = (l) => update(l.id, { status: 'active', takenAt: Date.now() })
   const giveBack = (l) => { update(l.id, { status: 'returned', returnedAt: Date.now() }); notify({ text: `${l.user} החזיר/ה את הרמקול`, kind: 'speaker', to: 'admins', link: '/speaker' }) }
@@ -111,7 +118,7 @@ export default function Speaker({ profile }) {
                 <div className="text-sm">{l.purpose}</div>
                 <div className="text-sm text-slate-500">{fmtDateTime(l.from)} ← {fmtDateTime(l.to)}</div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button onClick={() => decide(l, true)} className="rounded-xl bg-emerald-500 py-2.5 font-bold text-white">אישור</button>
+                  <button onClick={() => decide(l, true)} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 font-bold text-white"><Icon name="MessageCircle" size={16} />אישור ושליחה בוואטסאפ</button>
                   <button onClick={() => decide(l, false)} className="rounded-xl bg-slate-100 py-2.5 font-bold dark:bg-white/10">דחייה</button>
                 </div>
               </div>
@@ -129,6 +136,7 @@ export default function Speaker({ profile }) {
                 <div className="flex items-center gap-2"><span className="flex-1 font-bold">{l.user}</span><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${statusCls[l.status]}`}>{statusText[l.status]}</span></div>
                 <div className="text-sm text-slate-500">{l.purpose}</div>
                 {l.phone && <a href={`tel:${l.phone}`} className="text-sm font-semibold text-navy-600 dark:text-accent-400" dir="ltr">{l.phone}</a>}
+                {isAdmin && ['approved', 'active'].includes(l.status) && <button onClick={() => sendApproval(l)} className="mt-1 inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"><Icon name="MessageCircle" size={13} />שליחת האישור בוואטסאפ</button>}
                 <div className="text-xs text-slate-400">לקח: {fmtDateTime(l.takenAt || l.from)}{l.returnedAt && ` · החזיר: ${fmtDateTime(l.returnedAt)}`}</div>
               </div>
             ))}
@@ -197,4 +205,21 @@ export function Taken({ what, who, phone, from, to }) {
       {phone && <a href={`tel:${phone}`} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-sm font-bold text-rose-700 shadow-sm dark:bg-navy-950"><Icon name="Phone" size={14} /><span dir="ltr">{phone}</span></a>}
     </div>
   )
+}
+
+// ההודעה שנשלחת בוואטסאפ למי שקיבל אישור
+export function approvalMessage(l) {
+  const first = (l.user || '').split(' ')[0]
+  return [
+    `היי ${first}! 👋`,
+    'אישרתי לך את הרמקול 🔊✅',
+    '',
+    `📅 מ-${fmtDateTime(l.from)} עד ${fmtDateTime(l.to)}`,
+    l.purpose ? `🎯 ${l.purpose}` : null,
+    '',
+    '*תזכורת לכללים:*',
+    ...SPEAKER_TERMS.map((t) => `✅ ${t}`),
+    '',
+    `📍 בוא/י נתאם מתי לוקחים ממני ומתי מחזירים 🙂`,
+  ].filter((x) => x !== null).join('\n')
 }

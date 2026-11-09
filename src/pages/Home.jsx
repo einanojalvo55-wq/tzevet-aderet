@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
 import Tile from '../components/Tile'
 import Logo from '../components/Logo'
+import NotifBanner from '../components/NotifBanner'
 import { useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
 import { speakerStatus } from './Speaker'
 import { DAYS } from '../data/seed'
@@ -62,6 +63,7 @@ export default function Home({ profile }) {
       </header>
 
       <main className="mx-auto -mt-11 max-w-md px-4 pb-28">
+        <NotifBanner />
         {a && (
           <Link to="/announcements"
             className={`mb-4 flex items-start gap-3 rounded-3xl bg-white p-4 shadow-card transition active:scale-[.98] dark:bg-navy-900 ${!readIds.includes(a.id) ? 'ring-2 ring-accent-500' : 'ring-1 ring-slate-900/5 dark:ring-white/5'}`}>

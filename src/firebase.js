@@ -1,7 +1,7 @@
 import { firebaseConfig, vapidKey, pushUrl } from './firebase-config'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, arrayUnion } from 'firebase/firestore'
 import { getMessaging, getToken, isSupported } from 'firebase/messaging'
 
 // האם מחוברים לשרת
@@ -44,7 +44,8 @@ export async function enablePush() {
   const reg = await navigator.serviceWorker.register(`./firebase-messaging-sw.js?config=${encodeURIComponent(JSON.stringify(firebaseConfig))}`)
   const token = await getToken(getMessaging(app), { vapidKey, serviceWorkerRegistration: reg })
   const u = await ready
-  await updateDoc(doc(db, 'users', u.uid), { tokens: arrayUnion(token) })
+  await setDoc(doc(db, 'users', u.uid), { tokens: arrayUnion(token) }, { merge: true })
+  try { localStorage.setItem('tzevet-aderet:pushOn', '1') } catch { /* */ }
   return 'granted'
 }
 

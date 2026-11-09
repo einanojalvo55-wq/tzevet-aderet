@@ -21,7 +21,8 @@ export default function Profile({ profile, onSave, onReset }) {
   if (editing) return <Onboarding initial={profile} onDone={(p) => { onSave(p); setEditing(false) }} onCancel={() => setEditing(false)} />
 
   const initials = profile.firstName[0] + (profile.lastName[0] || '')
-  const perm = 'Notification' in window ? Notification.permission : 'unsupported'
+  const pushOnFlag = (() => { try { return localStorage.getItem('tzevet-aderet:pushOn') === '1' } catch { return false } })()
+  const perm = 'Notification' in window && (!online || pushOnFlag) ? Notification.permission : 'default'
 
   async function enable() {
     if (!('Notification' in window)) return setMsg('בטלפון הזה צריך קודם להוסיף את האפליקציה למסך הבית')

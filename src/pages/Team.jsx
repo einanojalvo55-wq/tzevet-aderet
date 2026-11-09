@@ -1,24 +1,11 @@
-import { useEffect, useState } from 'react'
-import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore'
+import { useState } from 'react'
+import { doc, deleteDoc } from 'firebase/firestore'
 import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import Chips from '../components/Chips'
-import { online, db, ready, uid } from '../firebase'
+import { online, db, uid } from '../firebase'
+import { useTeam, waNumber } from '../data/team'
 import { useAdmin, useSettings } from '../data/hooks'
-
-const waNumber = (p) => p.replace(/\D/g, '').replace(/^0/, '972')
-
-// כל אנשי הצוות שנרשמו לאפליקציה, עם מספר הטלפון שלהם
-function useTeam(profile) {
-  const [team, setTeam] = useState(online ? null : [{ id: 'me', ...profile, name: `${profile.firstName} ${profile.lastName}` }])
-  useEffect(() => {
-    if (!online) return
-    let unsub = () => {}
-    ready.then(() => { unsub = onSnapshot(collection(db, 'users'), (s) => setTeam(s.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.firstName))) })
-    return () => unsub()
-  }, [])
-  return team
-}
 
 export default function Team({ profile }) {
   const team = useTeam(profile)
