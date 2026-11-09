@@ -3,7 +3,7 @@ import Icon from '../components/Icon'
 import Tile from '../components/Tile'
 import Logo from '../components/Logo'
 import NotifBanner from '../components/NotifBanner'
-import { useRefunds, useSettings, useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
+import { useRefunds, useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
 import { speakerStatus } from './Speaker'
 import { DAYS } from '../data/seed'
 import { todayISO, relDay, eventTime, toMin, parseISO } from '../data/dates'
@@ -25,7 +25,6 @@ export default function Home({ profile }) {
   const [bookings] = useBookings()
   const [reports] = useReports()
   const [refunds] = useRefunds()
-  const [settings] = useSettings()
 
   const unread = list.filter((x) => !readIds.includes(x.id)).length
   const a = sortAnnouncements(list)[0]
@@ -41,7 +40,7 @@ export default function Home({ profile }) {
   const pendingLoans = isAdmin ? loans.filter((l) => l.status === 'pending').length : 0
 
   const me = fullName(profile)
-  const refundMgr = isAdmin || me === (settings.refundsManager ?? 'נועה הדר')
+  const refundMgr = isAdmin
   const refundBadge = refundMgr ? refunds.filter((r) => r.status === 'pending').length : 0
   const myRefunds = refunds.filter((r) => r.by === me && ['pending', 'approved'].includes(r.status)).length
   const tiles = [

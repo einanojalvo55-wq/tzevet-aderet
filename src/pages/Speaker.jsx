@@ -7,6 +7,7 @@ import { fmtDateTime } from '../data/dates'
 import { newId } from '../data/store'
 import speakerImg from '../assets/speaker.png'
 import { useTeam, waLink } from '../data/team'
+import PasswordSheet from '../components/PasswordSheet'
 
 // למי מחזירים את הרמקול
 export const SPEAKER_HOME = 'עינן'
@@ -51,6 +52,7 @@ export default function Speaker({ profile }) {
   const [isAdmin] = useAdmin()
   const [{ speakerApproval }] = useSettings()
   const [asking, setAsking] = useState(false)
+  const [confirmAct, setConfirmAct] = useState(null) // אישור/דחייה שמחכים לסיסמה
   const team = useTeam(profile)
   const me = fullName(profile)
   const st = speakerStatus(loans)
@@ -136,8 +138,8 @@ export default function Speaker({ profile }) {
                 <div className="text-sm">{l.purpose}</div>
                 <div className="text-sm text-slate-500">{fmtDateTime(l.from)} ← {fmtDateTime(l.to)}</div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button onClick={() => decide(l, true)} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 font-bold text-white"><Icon name="MessageCircle" size={16} />אישור ושליחה בוואטסאפ</button>
-                  <button onClick={() => decide(l, false)} className="rounded-xl bg-slate-100 py-2.5 font-bold dark:bg-white/10">דחייה</button>
+                  <button onClick={() => setConfirmAct({ l, ok: true })} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 font-bold text-white"><Icon name="MessageCircle" size={16} />אישור ושליחה בוואטסאפ</button>
+                  <button onClick={() => setConfirmAct({ l, ok: false })} className="rounded-xl bg-slate-100 py-2.5 font-bold dark:bg-white/10">דחייה</button>
                 </div>
               </div>
             ))}
@@ -162,6 +164,7 @@ export default function Speaker({ profile }) {
         )}
       </section>
 
+      {confirmAct && <PasswordSheet title={confirmAct.ok ? 'אישור בקשה לרמקול' : 'דחיית בקשה לרמקול'} onClose={() => setConfirmAct(null)} onOk={() => { decide(confirmAct.l, confirmAct.ok); setConfirmAct(null) }} />}
       {asking && <RequestForm loans={loans} onClose={() => setAsking(false)} onSend={request} />}
     </div>
   )

@@ -3,12 +3,14 @@ import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import Sheet, { field, primaryBtn } from '../components/Sheet'
 import Chips from '../components/Chips'
-import StoredImage from '../components/StoredImage'
-import { useRefunds, useAdmin, useSettings, fullName, notify } from '../data/hooks'
+import StoredImage, { localImages } from '../components/StoredImage'
+import { useRefunds, useAdmin, fullName, notify } from '../data/hooks'
 import { timeAgo, todayISO, fmtShort } from '../data/dates'
 import { newId } from '../data/store'
 import { online, saveImage } from '../firebase'
 import { shrink } from './Reports'
+import PhotoViewer from '../components/PhotoViewer'
+import PasswordSheet from '../components/PasswordSheet'
 
 // החזרים כספיים: מדריך קנה משהו לצוות, מעלה קבלה, והאחראית מאשרת ומחזירה את הכסף
 const STATUS = { pending: 'מחכה לאישור', approved: 'אושר, מחכה להחזר', paid: 'הכסף הוחזר ✓', rejected: 'נדחה' }
@@ -27,14 +29,14 @@ const money = (n) => `₪${Number(n || 0).toLocaleString('he-IL', { maximumFract
 export default function Refunds({ profile }) {
   const [list, setList] = useRefunds()
   const [isAdmin] = useAdmin()
-  const [settings] = useSettings()
-  const refundsManager = settings.refundsManager ?? 'נועה הדר'
   const [writing, setWriting] = useState(null) // 'refund' | 'budget'
   const [filter, setFilter] = useState('open')
   const [photo, setPhoto] = useState(null)
+  const [confirmAct, setConfirmAct] = useState(null) // פעולה שמחכה לסיסמה
+  const withPassword = (r, status) => setConfirmAct({ r, status })
   const me = fullName(profile)
-  // מי שמנהלת את ההחזרים (או מנהל) רואה את כל הבקשות
-  const isManager = isAdmin || (refundsManager && me === refundsManager)
+  // רק המנהלים רואים את כל הבקשות ומאשרים
+  const isManager = isAdmin
   const mine = isManager ? list : list.filter((r) => r.by === me)
   const visible = mine
     .filter((r) => { const open = r.status === 'pending' || (r.status === 'approved' && !isBudget(r)); return filter === 'all' || (filter === 'open' ? open : !open) })
@@ -43,14 +45,22 @@ export default function Refunds({ profile }) {
   const waiting = list.filter((r) => r.status === 'pending').length
   const myOpen = list.filter((r) => r.by === me && !isBudget(r) && ['pending', 'approved'].includes(r.status)).reduce((s, r) => s + Number(r.amount || 0), 0)
 
-  const send = async (r) => {
+  // שליחה מהירה: הבקשה נשמרת מיד, והקבלה עולה לשרת ברקע
+  const send = (r) => {
     const id = newId()
     let receipt = r.receipt
     if (online && receipt) {
-      try { await saveImage(id, receipt); receipt = `img:${id}` } catch { alert('העלאת הקבלה נכשלה. בדקו חיבור ונסו שוב.'); return false }
+      const ref = `img:${id}`
+      localImages.set(ref, receipt)
+      const upload = (attempt = 0) => saveImage(id, r.receipt).catch(() => {
+        if (attempt < 3) setTimeout(() => upload(attempt + 1), 3000)
+        else alert('העלאת הקבלה נכשלה. בדקו חיבור לאינטרנט ושלחו שוב.')
+      })
+      upload()
+      receipt = ref
     }
     setList((l) => [{ ...r, receipt, id, by: me, phone: profile.phone || '', status: 'pending', createdAt: Date.now() }, ...l])
-    notify({ text: r.kind === 'budget' ? `💰 בקשת תקציב מ${me}: ${money(r.amount)} ל${r.what}` : `🧾 בקשת החזר מ${me}: ${money(r.amount)} על ${r.what}`, kind: 'refund', to: refundsManager || 'admins', link: '/refunds' })
+    notify({ text: r.kind === 'budget' ? `💰 בקשת תקציב מ${me}: ${money(r.amount)} ל${r.what}` : `🧾 בקשת החזר מ${me}: ${money(r.amount)} על ${r.what}`, kind: 'refund', to: 'admins', link: '/refunds' })
     setWriting(null)
     return true
   }
@@ -72,7 +82,7 @@ export default function Refunds({ profile }) {
       ) : (
         <div className="rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white shadow-lg">
           <div className="text-sm font-semibold text-white/85">צריכים כסף לפעולה, או קניתם משהו לצוות?</div>
-          <div className="mt-1 text-lg font-extrabold">מבקשים תקציב מראש, או מעלים קבלה ו{refundsManager ? refundsManager.split(' ')[0] : 'האחראית'} מחזירה לכם את הכסף</div>
+          <div className="mt-1 text-lg font-extrabold">מבקשים תקציב מראש, או מעלים קבלה והמנהלים מחזירים לכם את הכסף</div>
           {myOpen > 0 && <div className="mt-2 inline-block rounded-full bg-white/20 px-3 py-1 text-sm font-bold">מחכה לך: {money(myOpen)}</div>}
         </div>
       )}
@@ -104,19 +114,20 @@ export default function Refunds({ profile }) {
             </div>
             {isManager && r.status === 'pending' && (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button onClick={() => setStatus(r, 'approved')} className="rounded-xl bg-emerald-500 py-2.5 font-bold text-white active:scale-95">אישור</button>
-                <button onClick={() => { if (confirm('לדחות את הבקשה?')) setStatus(r, 'rejected') }} className="rounded-xl bg-slate-100 py-2.5 font-bold active:scale-95 dark:bg-white/10">דחייה</button>
+                <button onClick={() => withPassword(r, 'approved')} className="rounded-xl bg-emerald-500 py-2.5 font-bold text-white active:scale-95">אישור</button>
+                <button onClick={() => withPassword(r, 'rejected')} className="rounded-xl bg-slate-100 py-2.5 font-bold active:scale-95 dark:bg-white/10">דחייה</button>
               </div>
             )}
             {isManager && r.status === 'approved' && !isBudget(r) && (
-              <button onClick={() => setStatus(r, 'paid')} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 font-bold text-white active:scale-95"><Icon name="Wallet" size={18} />החזרתי את הכסף</button>
+              <button onClick={() => withPassword(r, 'paid')} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 font-bold text-white active:scale-95"><Icon name="Wallet" size={18} />החזרתי את הכסף</button>
             )}
           </article>
         ))}
       </div>
 
       {writing && <RefundForm kind={writing} onClose={() => setWriting(null)} onSend={send} />}
-      {photo && <div className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4" onClick={() => setPhoto(null)}><img src={photo} alt="" className="max-h-full max-w-full rounded-2xl" /></div>}
+      <PhotoViewer src={photo} onClose={() => setPhoto(null)} />
+      {confirmAct && <PasswordSheet title={{ approved: 'אישור הבקשה', rejected: 'דחיית הבקשה', paid: 'סימון שהכסף הוחזר' }[confirmAct.status]} onClose={() => setConfirmAct(null)} onOk={() => { setStatus(confirmAct.r, confirmAct.status); setConfirmAct(null) }} />}
     </div>
   )
 }
@@ -138,7 +149,7 @@ function RefundForm({ kind, onClose, onSend }) {
         {!budget && <label className={`flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-4 ${receipt ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' : 'border-slate-300 bg-slate-50 dark:border-white/15 dark:bg-navy-950'}`}>
           {receipt ? <img src={receipt} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <Icon name="Camera" size={26} className="text-slate-500" />}
           <span className="flex-1 font-bold">{receipt ? 'הקבלה צורפה ✓ (לחיצה להחלפה)' : 'צילום הקבלה (חובה)'}</span>
-          <input type="file" accept="image/*" className="hidden" onChange={async (e) => e.target.files[0] && setReceipt(await shrink(e.target.files[0]))} />
+          <input type="file" accept="image/*" className="hidden" onChange={async (e) => e.target.files[0] && setReceipt(await shrink(e.target.files[0], 900, 0.62))} />
         </label>}
         <input className={field} value={what} onChange={(e) => setWhat(e.target.value)} placeholder={budget ? 'בשביל מה? (למשל: חומרים לפעולה)' : 'מה קנית? (למשל: חטיפים לפעולה)'} />
         <div className="grid grid-cols-2 gap-2">
@@ -146,7 +157,7 @@ function RefundForm({ kind, onClose, onSend }) {
           <label><span className="mb-1 block text-sm font-semibold">{budget ? 'מתי צריך' : 'תאריך הקנייה'}</span><input type="date" className={field} value={date} onChange={(e) => setDate(e.target.value)} /></label>
         </div>
         <input className={field} value={note} onChange={(e) => setNote(e.target.value)} placeholder="הערה (לא חובה, למשל: לאיזו פעולה)" />
-        <button disabled={!ok || busy} onClick={async () => { setBusy(true); const done = await onSend({ kind: budget ? 'budget' : 'refund', what: what.trim(), amount: amt, date, note: note.trim(), receipt: budget ? null : receipt }); if (!done) setBusy(false) }} className={primaryBtn}>{busy ? 'שולח...' : 'שליחה לאישור'}</button>
+        <button disabled={!ok || busy} onClick={() => { setBusy(true); const done = onSend({ kind: budget ? 'budget' : 'refund', what: what.trim(), amount: amt, date, note: note.trim(), receipt: budget ? null : receipt }); if (!done) setBusy(false) }} className={primaryBtn}>{busy ? 'שולח...' : 'שליחה לאישור'}</button>
         {!budget && !receipt && <p className="text-center text-xs text-slate-400">צריך לצרף צילום של הקבלה</p>}
       </div>
     </Sheet>

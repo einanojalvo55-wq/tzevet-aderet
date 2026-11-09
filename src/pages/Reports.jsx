@@ -9,6 +9,7 @@ import { timeAgo } from '../data/dates'
 import { newId } from '../data/store'
 import { online, saveImage } from '../firebase'
 import StoredImage from '../components/StoredImage'
+import PhotoViewer from '../components/PhotoViewer'
 
 export const REPORT_TYPES = {
   fault: { label: 'תקלה בסניף', icon: 'Wrench', hint: 'משהו שבור, נורה, מזגן' },
@@ -78,20 +79,20 @@ export default function Reports({ profile }) {
 
       <Fab label="דיווח חדש" onClick={() => setWriting(true)} />
       {writing && <ReportForm onClose={() => setWriting(false)} onSend={send} />}
-      {photo && <div className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4" onClick={() => setPhoto(null)}><img src={photo} alt="" className="max-h-full max-w-full rounded-2xl" /></div>}
+      <PhotoViewer src={photo} onClose={() => setPhoto(null)} />
     </div>
   )
 }
 
 // מקטין תמונה לפני השמירה כדי שלא תתפוס הרבה מקום
-export function shrink(file) {
+export function shrink(file, max = 1000, quality = 0.7) {
   return new Promise((res) => {
     const img = new Image()
     img.onload = () => {
-      const s = Math.min(1, 1000 / Math.max(img.width, img.height))
+      const s = Math.min(1, max / Math.max(img.width, img.height))
       const c = document.createElement('canvas'); c.width = img.width * s; c.height = img.height * s
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
-      res(c.toDataURL('image/jpeg', 0.7)); URL.revokeObjectURL(img.src)
+      res(c.toDataURL('image/jpeg', quality)); URL.revokeObjectURL(img.src)
     }
     img.onerror = () => res(null)
     img.src = URL.createObjectURL(file)
