@@ -62,7 +62,7 @@ export default function Rooms({ profile }) {
     const saved = isNew ? { ...b, id: newId() } : b
     setList((l) => isNew ? [...l, saved] : l.map((x) => x.id === b.id ? saved : x))
     const when = b.date ? days.find((d) => d.value === b.date)?.label || b.date : `כל יום ${DAYS[b.day]}`
-    if (tribes.includes(b.who)) notify({ text: `שיבוץ חדר: ${b.who} ב${b.room}, ${when} ${b.from}–${b.to}`, kind: 'room', to: `tribe:${b.who}`, link: '/rooms' })
+    if (tribes.includes(b.who)) notify({ text: `שיבוץ חדר: ${b.who} ב${b.room}, ${when} \u200E${b.from}–${b.to}\u200E`, kind: 'room', to: `tribe:${b.who}`, link: '/rooms' })
     setEditing(null)
   }
   const remove = (b) => { if (confirm('לבטל את ההזמנה?')) { setList((l) => l.filter((x) => x.id !== b.id)); setEditing(null) } }
@@ -74,7 +74,7 @@ export default function Rooms({ profile }) {
       <div className="rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 p-5 text-white shadow-lg">
         <div className="text-sm font-semibold text-white/80">השיבוצים שלי ושל {profile.tribe}</div>
         {mine.length === 0 ? <div className="mt-1 text-lg font-extrabold">אין שיבוצים. אפשר להזמין חדר פנוי 👇</div> : mine.map((b) => (
-          <div key={b.id} className="mt-1 flex items-center gap-2 font-bold"><Icon name="DoorOpen" size={18} />{b.room} · {b.date ? days.find((d) => d.value === b.date)?.label || b.date : `כל יום ${DAYS[b.day]}`} {b.from}–{b.to}</div>
+          <div key={b.id} className="mt-1 flex items-center gap-2 font-bold"><Icon name="DoorOpen" size={18} />{b.room} · {b.date ? days.find((d) => d.value === b.date)?.label || b.date : `כל יום ${DAYS[b.day]}`} <span dir="ltr">{b.from}–{b.to}</span></div>
         ))}
       </div>
 

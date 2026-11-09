@@ -52,17 +52,20 @@ export default function Home({ profile }) {
 
   return (
     <div className="page-in">
-      <header className="pt-safe bg-gradient-to-b from-navy-800 to-navy-700 px-5 pb-16 text-white dark:from-navy-900 dark:to-navy-900">
-        <div className="mx-auto flex max-w-md items-center justify-between pt-5">
+      <header className="pt-safe relative overflow-hidden bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-5 pb-16 text-white">
+        <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-accent-500/15 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 right-10 h-48 w-48 rounded-full bg-sky-400/10 blur-2xl" />
+        <div className="relative mx-auto flex max-w-md items-center justify-between pt-5">
           <div>
-            <div className="text-sm text-navy-100/80">צוות אדרת</div>
-            <h1 className="text-2xl font-extrabold">{greeting()}, {profile.firstName}</h1>
+            <div className="text-sm font-semibold text-accent-400">צוות אדרת</div>
+            <h1 className="text-[26px] font-extrabold leading-tight">{greeting()}, {profile.firstName} 👋</h1>
+            <div className="mt-0.5 text-sm text-navy-100/80">{new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
           </div>
           <Logo className="h-14 w-14 rounded-2xl shadow-lg ring-1 ring-white/20" />
         </div>
       </header>
 
-      <main className="mx-auto -mt-11 max-w-md px-4 pb-28">
+      <main className="relative mx-auto -mt-11 max-w-md px-4 pb-28">
         <NotifBanner />
         {a && (
           <Link to="/announcements"

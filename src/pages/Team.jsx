@@ -44,7 +44,8 @@ export default function Team({ profile }) {
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-navy-500 to-navy-800 font-bold text-white">{u.firstName[0]}{u.lastName?.[0]}</div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-bold">{u.firstName} {u.lastName}{u.id === me && <span className="font-normal text-slate-400"> (אני)</span>}</div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">{u.tribe}{gradeOf(u.tribe) && ` (${gradeOf(u.tribe)})`}{u.phone && <> · <span dir="ltr">{u.phone}</span></>}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">{u.tribe}{gradeOf(u.tribe) && ` · ${gradeOf(u.tribe)}`}</div>
+                  {u.phone && <div className="text-xs text-slate-400" dir="ltr" style={{ textAlign: 'right' }}>{u.phone}</div>}
                 </div>
                 {u.phone && <>
                   <a href={`tel:${u.phone}`} className="grid h-10 w-10 place-items-center rounded-full bg-rose-100 text-rose-700 active:scale-95 dark:bg-rose-500/15 dark:text-rose-300" aria-label="התקשרות"><Icon name="Phone" size={18} /></a>
