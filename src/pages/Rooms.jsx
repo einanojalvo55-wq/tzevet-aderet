@@ -46,12 +46,15 @@ export default function Rooms({ profile }) {
   const [isAdmin] = useAdmin()
   const days = nextDays()
   const [date, setDate] = useState(days[0].value)
+  const [view, setView] = useState('days')
+  const [roomFilter, setRoomFilter] = useState('all')
   const [editing, setEditing] = useState(null)
   const me = fullName(profile)
-  const mine = list.filter((b) => b.who === profile.tribe || b.by === me)
+  const mine = list.filter((b) => b.by === me || b.who === profile.tribe || (b.who || '').split(/[-+ ]+/).includes(profile.tribe))
     .filter((b) => b.day != null || b.date >= todayISO())
     .sort((a, b) => (a.date || '9') .localeCompare(b.date || '9') || (a.day ?? 9) - (b.day ?? 9) || toMin(a.from) - toMin(b.from))
     .slice(0, 4)
+  const isMine = (b) => b.by === me || b.who === profile.tribe || (b.who || '').split(/[-+ ]+/).includes(profile.tribe)
   const canEdit = (b) => isAdmin || (b.by && b.by === me)
 
   const save = (b) => {
@@ -75,6 +78,18 @@ export default function Rooms({ profile }) {
         ))}
       </div>
 
+      <div className="mt-5 grid grid-cols-2 gap-1 rounded-2xl bg-slate-200/70 p-1 dark:bg-white/5">
+        {[['days', 'לפי ימים', 'List'], ['rooms', 'לפי חדר', 'DoorOpen']].map(([v, l, i]) => (
+          <button key={v} onClick={() => setView(v)} className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold transition ${view === v ? 'bg-white shadow dark:bg-navy-800' : 'text-slate-500'}`}>
+            <Icon name={i} size={16} /> {l}
+          </button>
+        ))}
+      </div>
+
+      {view === 'days' ? (
+        <DaysView list={list} rooms={rooms} days={days} roomFilter={roomFilter} setRoomFilter={setRoomFilter} profile={profile} me={me} canEdit={canEdit} onOpen={setEditing} onBook={(iso) => setEditing({ date: iso, room: roomFilter !== 'all' ? roomFilter : rooms[0] })} />
+      ) : (
+        <>
       <div className="-mx-4 mt-5 overflow-x-auto px-4 pb-1">
         <div className="flex w-max gap-2">
           {days.map((d) => (
@@ -96,7 +111,7 @@ export default function Rooms({ profile }) {
               {items.length === 0 ? <div className="text-sm font-semibold text-emerald-600">✓ פנוי כל היום</div> : (
                 <div className="space-y-1.5">
                   {items.map((b) => (
-                    <button key={b.id} disabled={!canEdit(b)} onClick={() => setEditing(b)} className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm ${b.who === profile.tribe || b.by === me ? 'bg-teal-500 font-bold text-white' : 'bg-slate-50 dark:bg-white/5'}`}>
+                    <button key={b.id} disabled={!canEdit(b)} onClick={() => setEditing(b)} className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm ${isMine(b) ? 'bg-teal-500 font-bold text-white' : 'bg-slate-50 dark:bg-white/5'}`}>
                       <span className="min-w-0 flex-1">{b.who}{b.note && <span className="font-normal opacity-80"> · {b.note}</span>}{b.day != null && <span className="opacity-70"> · קבוע</span>}</span>
                       {b.phone && <a href={`tel:${b.phone}`} onClick={(e) => e.stopPropagation()} className="opacity-80" dir="ltr">{b.phone}</a>}
                       <span dir="ltr">{b.from}–{b.to}</span>
@@ -109,6 +124,9 @@ export default function Rooms({ profile }) {
           )
         })}
       </div>
+
+        </>
+      )}
 
       <Fab label="הזמנת חדר" onClick={() => setEditing({ date })} />
       {editing && <BookingForm initial={editing} list={list} rooms={rooms} tribes={tribes} days={days} profile={profile} isAdmin={isAdmin}
@@ -152,5 +170,75 @@ function BookingForm({ initial, list, rooms, tribes, days, profile, isAdmin, onC
         {onDelete && <button onClick={onDelete} className="w-full py-2 font-semibold text-rose-600">ביטול ההזמנה</button>}
       </div>
     </Sheet>
+  )
+}
+
+// הערה בלי "חודש ארגון" (מופיע פעם אחת למעלה)
+const cleanNote = (n) => (n || '').split(' · ').filter((x) => x !== 'חודש ארגון').join(' · ')
+
+// תצוגה מסודרת לפי ימים: כל יום כרטיס, ובתוכו השעות לפי הסדר
+function DaysView({ list, rooms, days, roomFilter, setRoomFilter, profile, me, canEdit, onOpen, onBook }) {
+  const today = days[0].value
+  const shown = list.filter((b) => roomFilter === 'all' || b.room === roomFilter)
+  // עד התאריך האחרון שיש בו שיבוץ (לפחות שבוע קדימה)
+  const lastBooked = shown.filter((b) => b.date && b.date >= today).map((b) => b.date).sort().pop()
+  const until = [days[6].value, lastBooked].filter(Boolean).sort().pop()
+  const range = days.filter((d) => d.value <= until)
+  const orgMonth = shown.filter((b) => b.date >= today && (b.note || '').includes('חודש ארגון')).map((b) => b.date).sort().pop()
+
+  return (
+    <div className="mt-4">
+      <div className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="flex w-max gap-2">
+          {[{ value: 'all', label: 'כל החדרים' }, ...rooms.map((r) => ({ value: r, label: r }))].map((o) => (
+            <button key={o.value} onClick={() => setRoomFilter(o.value)} className={`whitespace-nowrap rounded-2xl px-4 py-2 text-sm font-bold transition ${roomFilter === o.value ? 'bg-teal-600 text-white' : 'bg-white shadow-card dark:bg-navy-900'}`}>{o.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {orgMonth && (
+        <div className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+          📌 לוח שיבוצים של חודש ארגון, עד {parseISO(orgMonth).getDate()}.{parseISO(orgMonth).getMonth() + 1}. אחרי זה כל אחד מזמין בעצמו.
+        </div>
+      )}
+
+      <div className="mt-3 space-y-3">
+        {range.map((d) => {
+          const items = shown.filter((b) => isOn(b, d.value)).sort((a, b) => toMin(a.from) - toMin(b.from) || a.room.localeCompare(b.room))
+          const dt = parseISO(d.value)
+          return (
+            <section key={d.value} className="overflow-hidden rounded-3xl bg-white shadow-card dark:bg-navy-900">
+              <div className={`flex items-center gap-2 px-4 py-2.5 ${d.value === today ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-white/5'}`}>
+                <span className="font-extrabold">יום {DAYS[dt.getDay()]}</span>
+                <span className={d.value === today ? 'text-white/85' : 'text-slate-500'}>{dt.getDate()}.{dt.getMonth() + 1}</span>
+                {d.value === today && <span className="rounded-full bg-white/25 px-2 text-xs font-bold">היום</span>}
+                <button onClick={() => onBook(d.value)} className={`mr-auto rounded-xl px-2.5 py-1 text-xs font-bold ${d.value === today ? 'bg-white/20' : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300'}`}>+ הזמנה</button>
+              </div>
+              {items.length === 0 ? (
+                <div className="px-4 py-2.5 text-sm font-semibold text-emerald-600">✓ הכול פנוי</div>
+              ) : (
+                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                  {items.map((b) => {
+                    const note = cleanNote(b.note)
+                    const mine = b.by === me || b.who === profile.tribe || (b.who || '').split(/[-+ ]+/).includes(profile.tribe)
+                    return (
+                      <button key={b.id} disabled={!canEdit(b)} onClick={() => onOpen(b)} className={`flex w-full items-start gap-3 px-4 py-2.5 text-right ${mine ? 'bg-teal-50 dark:bg-teal-500/10' : ''}`}>
+                        <span className="w-[92px] shrink-0 pt-0.5 text-sm font-extrabold tabular-nums text-navy-700 dark:text-accent-400" dir="ltr" style={{ textAlign: 'right' }}>{b.from}–{b.to}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-bold">{b.who}</span>
+                          {(note || roomFilter === 'all') && <span className="block text-xs text-slate-500 dark:text-slate-400">{[roomFilter === 'all' ? b.room : null, note || null].filter(Boolean).join(' · ')}</span>}
+                          {b.phone && <a href={`tel:${b.phone}`} onClick={(e) => e.stopPropagation()} className="text-xs font-semibold text-navy-600 dark:text-accent-400" dir="ltr">{b.phone}</a>}
+                        </span>
+                        {canEdit(b) && <Icon name="Pencil" size={14} className="mt-1 text-slate-400" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          )
+        })}
+      </div>
+    </div>
   )
 }

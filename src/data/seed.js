@@ -1,6 +1,3 @@
-const today = new Date()
-const iso = (d) => d.toISOString().slice(0, 10)
-const plus = (n) => { const d = new Date(today); d.setDate(d.getDate() + n); return iso(d) }
 
 export const seedAnnouncements = [
   { id: 'welcome', title: 'ברוכים הבאים לצוות אדרת!', body: 'מעכשיו כל ההודעות, האירועים והמספרים החשובים של הצוות נמצאים כאן.', important: false, author: 'הנהלת הסניף', createdAt: Date.now() },
@@ -29,15 +26,10 @@ export const EVENT_TYPES = {
   'שבת סניף': { color: 'teal', dot: 'bg-teal-500' },
 }
 
-export const seedEvents = [
-  { id: 'e1', title: 'ישיבת צוות', date: plus(2), time: '20:30', place: 'הסניף', type: 'ישיבת צוות', owner: 'הקומונרית', desc: 'סוגרים את התוכנית לחודש הקרוב.', rsvp: {} },
-  { id: 'e2', title: 'פעולה שבועית', date: plus(5), time: '16:30', place: 'הסניף', type: 'פעולה', owner: '', desc: '', rsvp: {} },
-]
+// בלי אירועי דוגמה: מתחילים ריק, והמנהלים מוסיפים אירועים אמיתיים
+export const seedEvents = []
 
 export const DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
 // שיבוץ שבועי קבוע: day = 0 (ראשון) עד 6 (שבת)
-export const seedBookings = [
-  { id: 'b1', room: 'חדר גדול', day: 6, from: '16:00', to: '17:30', who: 'שבט ז׳' },
-  { id: 'b2', room: 'חדר קטן', day: 6, from: '16:00', to: '17:30', who: 'שבט ה׳' },
-]
+export const seedBookings = []
