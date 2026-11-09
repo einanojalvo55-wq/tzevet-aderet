@@ -97,7 +97,7 @@ export default function Rooms({ profile }) {
                 <div className="space-y-1.5">
                   {items.map((b) => (
                     <button key={b.id} disabled={!canEdit(b)} onClick={() => setEditing(b)} className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm ${b.who === profile.tribe || b.by === me ? 'bg-teal-500 font-bold text-white' : 'bg-slate-50 dark:bg-white/5'}`}>
-                      <span className="min-w-0 flex-1 truncate">{b.who}{b.day != null && <span className="opacity-70"> · קבוע</span>}</span>
+                      <span className="min-w-0 flex-1">{b.who}{b.note && <span className="font-normal opacity-80"> · {b.note}</span>}{b.day != null && <span className="opacity-70"> · קבוע</span>}</span>
                       {b.phone && <a href={`tel:${b.phone}`} onClick={(e) => e.stopPropagation()} className="opacity-80" dir="ltr">{b.phone}</a>}
                       <span dir="ltr">{b.from}–{b.to}</span>
                       {canEdit(b) && <Icon name="Pencil" size={14} className="opacity-60" />}
