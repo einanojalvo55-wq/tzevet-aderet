@@ -14,7 +14,7 @@ import Reports from './pages/Reports'
 import Notifications from './pages/Notifications'
 import Team from './pages/Team'
 import Links from './pages/Links'
-import { online } from './firebase'
+import { online, watchMyUser } from './firebase'
 import { loadProfile, saveProfile, clearProfile } from './data/profile'
 import { useEvents, useLoans, fullName, notify } from './data/hooks'
 import { useStore } from './data/store'
@@ -65,7 +65,15 @@ export default function App() {
   useReminders(profile)
 
   // מי שנרשם לפני שהוספנו טלפון מתבקש להשלים אותו
-  useEffect(() => { if (online && profile) saveProfile(profile) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // הפרופיל בשרת הוא הקובע לגבי השבט (מנהל יכול לשנות אותו).
+  // אם אין עדיין פרופיל בשרת, שומרים אותו שם.
+  useEffect(() => {
+    if (!online || !profile?.phone) return
+    return watchMyUser((d) => {
+      if (!d || !d.firstName) { saveProfile(profile); return }
+      if (d.tribe && d.tribe !== profile.tribe) save({ ...profile, tribe: d.tribe })
+    })
+  }, [profile]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!profile || !profile.phone) return <Onboarding initial={profile || undefined} onDone={save} />
 

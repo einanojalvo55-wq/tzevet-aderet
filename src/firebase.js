@@ -1,7 +1,7 @@
 import { firebaseConfig, vapidKey, pushUrl } from './firebase-config'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, arrayUnion } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, doc, setDoc, getDoc, arrayUnion, onSnapshot } from 'firebase/firestore'
 import { getMessaging, getToken, isSupported } from 'firebase/messaging'
 
 // האם מחוברים לשרת
@@ -68,4 +68,18 @@ export async function pushNow(id) {
     const token = await u.getIdToken()
     await fetch(pushUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ ids: [id] }) })
   } catch { /* השרת לא זמין, הגיבוי ב-GitHub ישלח */ }
+}
+
+// מאזין לפרופיל שלי בשרת (למשל כשמנהל משנה לי את השבט)
+export function watchMyUser(cb) {
+  if (!online) return () => {}
+  let unsub = () => {}, stopped = false
+  ready.then((u) => { if (!stopped) unsub = onSnapshot(doc(db, 'users', u.uid), (s) => cb(s.exists() ? s.data() : null), () => {}) })
+  return () => { stopped = true; unsub() }
+}
+
+// מנהל משנה פרטים של מישהו אחר (למשל שבט)
+export async function updateUser(id, data) {
+  await ready
+  await setDoc(doc(db, 'users', id), { ...data, updatedAt: Date.now() }, { merge: true })
 }

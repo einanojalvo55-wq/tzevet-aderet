@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Icon from '../components/Icon'
 import Onboarding from './Onboarding'
-import { useAdmin, useNotifPrefs, NOTIF_KINDS, showSystemNotification, notify, fullName } from '../data/hooks'
+import { useGradeOf, useAdmin, useNotifPrefs, NOTIF_KINDS, showSystemNotification, notify, fullName } from '../data/hooks'
 import { online, enablePush, saveUser } from '../firebase'
 
 /* global __BUILD__ */
@@ -16,9 +16,10 @@ function Toggle({ on }) {
 export default function Profile({ profile, onSave, onReset }) {
   const [editing, setEditing] = useState(false)
   const [isAdmin] = useAdmin()
+  const gradeOf = useGradeOf()
   const [prefs, setPrefs] = useNotifPrefs()
   const [msg, setMsg] = useState('')
-  if (editing) return <Onboarding initial={profile} onDone={(p) => { onSave(p); setEditing(false) }} onCancel={() => setEditing(false)} />
+  if (editing) return <Onboarding initial={profile} lockTribe={!isAdmin} onDone={(p) => { onSave(p); setEditing(false) }} onCancel={() => setEditing(false)} />
 
   const initials = profile.firstName[0] + (profile.lastName[0] || '')
   const pushOnFlag = (() => { try { return localStorage.getItem('tzevet-aderet:pushOn') === '1' } catch { return false } })()
@@ -49,7 +50,7 @@ export default function Profile({ profile, onSave, onReset }) {
         {profile.phone && <div className="text-sm text-slate-500" dir="ltr">{profile.phone}</div>}
         <div className="mt-1 flex gap-2 text-sm">
           <span className="rounded-full bg-navy-100 px-3 py-1 font-semibold text-navy-700 dark:bg-white/10 dark:text-white">{isAdmin ? 'מנהל' : roleName[profile.role]}</span>
-          <span className="rounded-full bg-accent-500/15 px-3 py-1 font-semibold text-accent-600 dark:text-accent-400">{profile.tribe}</span>
+          <span className="rounded-full bg-accent-500/15 px-3 py-1 font-semibold text-accent-600 dark:text-accent-400">{profile.tribe}{gradeOf(profile.tribe) && ` · ${gradeOf(profile.tribe)}`}</span>
         </div>
       </div>
 

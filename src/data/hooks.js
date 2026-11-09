@@ -1,6 +1,6 @@
 import { useStore, write, newId } from './store'
 import { online, uid, pushNow } from '../firebase'
-import { seedAnnouncements, seedContacts, seedEvents, seedSettings, seedBookings } from './seed'
+import { seedAnnouncements, seedContacts, seedEvents, seedSettings, seedBookings, GRADES } from './seed'
 import { loadProfile } from './profile'
 
 export const useAnnouncements = () => useStore('announcements', seedAnnouncements)
@@ -64,4 +64,15 @@ export async function showSystemNotification(text) {
     else new Notification('צוות אדרת', { body: text, lang: 'he', dir: 'rtl' })
     return true
   } catch { return false }
+}
+
+// "מעלות" → "כיתה ו׳" (לפי המקום ברשימת השבטים)
+export function useGradeOf() {
+  const [{ tribes }] = useSettings()
+  return (t) => {
+    // אם הכיתה כבר כתובה בשם (למשל "ג זרעים"), לא מוסיפים אותה שוב
+    if (!t || /^([א-ט]|י[אב]?)['׳״"]?\s/.test(t)) return ''
+    const i = tribes.indexOf(t)
+    return i >= 0 && GRADES[i] ? `כיתה ${GRADES[i]}` : ''
+  }
 }

@@ -123,7 +123,7 @@ function AdminPanel({ onExit }) {
         <span className={`flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition ${settings.speakerApproval ? 'justify-start bg-emerald-500' : 'justify-end bg-slate-300 dark:bg-white/20'}`}><span className="h-5 w-5 rounded-full bg-white shadow" /></span>
       </button>
 
-      <ListEditor title="שבטים" items={settings.tribes} onChange={(tribes) => setSettings({ ...settings, tribes })} placeholder="שם שבט חדש" />
+      <ListEditor title="שבטים (לפי הסדר: הראשון כיתה ג׳, השני ד׳...)" items={settings.tribes} onChange={(tribes) => setSettings({ ...settings, tribes })} placeholder="שם שבט חדש" />
       <ListEditor title="חדרים בסניף" items={settings.rooms} onChange={(rooms) => setSettings({ ...settings, rooms })} placeholder="שם חדר חדש" />
 
       <Link to="/team" className="flex items-center gap-3 rounded-3xl bg-white p-4 shadow-card dark:bg-navy-900">
