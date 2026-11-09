@@ -64,7 +64,9 @@ export default function Speaker({ profile }) {
   const request = (r) => {
     const loan = { ...r, id: newId(), user: me, phone: profile.phone || '', createdAt: Date.now(), status: speakerApproval ? 'pending' : (r.from <= Date.now() ? 'active' : 'approved'), takenAt: !speakerApproval && r.from <= Date.now() ? Date.now() : null }
     setLoans((l) => [loan, ...l])
+    // התראה רק למנהלים: בקשה לאישור, או עדכון שמישהו לקח/הזמין את הרמקול
     if (speakerApproval) notify({ text: `${me} מבקש/ת את הרמקול: ${r.purpose}`, kind: 'speaker', to: 'admins', link: '/speaker' })
+    else notify({ text: `🔊 ${me} ${loan.status === 'active' ? 'לקח/ה' : 'הזמין/ה'} את הרמקול: ${r.purpose}`, kind: 'speaker', to: 'admins', link: '/speaker' })
     setAsking(false)
   }
   // הטלפון של מי שביקש: שמור בבקשה, ואם לא, לפי רשימת הצוות
