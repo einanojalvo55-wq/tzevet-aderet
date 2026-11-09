@@ -1,14 +1,15 @@
-# בדיקה: מה האתר מגיש בפועל בשתי הכתובות
+# בדיקה: מה האתר מגיש, והאם שרת ההתראות ב-Vercel עונה
 name: Check site
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      push_id: { description: 'מזהה התראה לשליחה', required: false, default: '' }
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in https://tzevet-aderet.web.app https://einanojalvo55-wq.github.io/tzevet-aderet; do
-            echo "=== $u"
-            curl -sI "$u/" | grep -iE "^HTTP|cache-control|last-modified"
-            echo -n "version.json: "; curl -s "$u/version.json"; echo
-            curl -s "$u/" | grep -o 'assets/index-[^"]*\.js'
-          done
+          echo -n "web.app version: "; curl -s https://tzevet-aderet.web.app/version.json; echo
+          echo -n "vercel OPTIONS: "; curl -s -o /dev/null -w "%{http_code}\n" -X OPTIONS https://tzevet-aderet.vercel.app/api/push
+          TOKEN=$(curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDNBY4CayU_BflmMIfsfcmCsZn9f6vgepg" -H 'Content-Type: application/json' -d '{"returnSecureToken":true}' | python3 -c "import sys,json;print(json.load(sys.stdin)['idToken'])")
+          echo -n "vercel push: "; curl -s -X POST https://tzevet-aderet.vercel.app/api/push -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "{\"ids\":[\"${{ inputs.push_id }}\"]}"; echo
