@@ -71,7 +71,7 @@ export function useGradeOf() {
   const [{ tribes }] = useSettings()
   return (t) => {
     // אם הכיתה כבר כתובה בשם (למשל "ג זרעים"), לא מוסיפים אותה שוב
-    if (!t || /^([א-ט]|י[אב]?)['׳״"]?\s/.test(t)) return ''
+    if (!t || t.includes('כיתה') || /^([א-ט]|י[אב]?)['׳״"]?\s/.test(t)) return ''
     const i = tribes.indexOf(t)
     return i >= 0 && GRADES[i] ? `כיתה ${GRADES[i]}` : ''
   }

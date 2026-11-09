@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": { "api/push.js": { "maxDuration": 30 } }
+  "functions": { "api/push.js": { "maxDuration": 30 } },
+  "git": { "deploymentEnabled": { "gh-pages": false } }
 }

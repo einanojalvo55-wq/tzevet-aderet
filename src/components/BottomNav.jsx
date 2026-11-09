@@ -14,7 +14,7 @@ export default function BottomNav({ profile }) {
     { to: '/profile', label: 'פרופיל', icon: 'User' },
   ]
   return (
-    <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-navy-950/90">
+    <nav style={{ transform: 'translateZ(0)' }} className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-navy-950/90">
       <div className="mx-auto grid max-w-md grid-cols-4 pt-2">
         {tabs.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.to === '/'}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
-import Tile from '../components/Tile'
+import { solid, tone } from '../components/colors'
 import Logo from '../components/Logo'
 import NotifBanner from '../components/NotifBanner'
 import { useAnnouncements, useReadIds, useAdmin, useEvents, useLoans, useBookings, useReports, sortAnnouncements, fullName } from '../data/hooks'
@@ -44,10 +44,10 @@ export default function Home({ profile }) {
     { id: 'rooms', title: 'חדרים', icon: 'DoorOpen', color: 'teal', sub: mine ? `${mine.room} · ${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`}` : 'הזמנת חדר פנוי' },
     { id: 'speaker', title: 'רמקול', icon: 'Speaker', color: 'green', sub: sp.label, dot: sp.color, badge: pendingLoans },
     { id: 'reports', title: 'דיווחים', icon: 'ClipboardList', color: 'orange', badge: openReports, sub: openReports ? `${openReports} פתוחים` : 'אין דיווחים פתוחים' },
-    { id: 'contacts', title: 'מספרים חשובים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
-    { id: 'links', title: 'קישורים חשובים', icon: 'Link', color: 'sky', sub: 'טפסים, אתרים ומסמכים' },
+    { id: 'contacts', title: 'מספרים', icon: 'Phone', color: 'rose', sub: 'לחיצה אחת ומתקשרים' },
+    { id: 'links', title: 'קישורים', icon: 'Link', color: 'sky', sub: 'טפסים, אתרים ומסמכים' },
     { id: 'team', title: 'הצוות', icon: 'Users', color: 'violet', sub: 'כל המדריכים והטלפונים' },
-    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'כניסה עם סיסמה', locked: !isAdmin, wide: true },
+    { id: 'admin', title: 'ניהול', icon: 'Settings', color: 'slate', sub: isAdmin ? 'מצב ניהול פעיל' : 'כניסה עם סיסמה', locked: !isAdmin },
   ]
 
   return (
@@ -80,10 +80,38 @@ export default function Home({ profile }) {
             </div>
           </Link>
         )}
-        <div className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => <Tile key={t.id} tile={t} />)}
+        <div className="grid grid-cols-3 gap-x-2 gap-y-4 rounded-3xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 dark:bg-navy-900 dark:ring-white/5">
+          {tiles.map((t) => (
+            <Link key={t.id} to={`/${t.id}`} className="relative flex flex-col items-center gap-1.5 rounded-2xl py-1 transition active:scale-95">
+              <span className={`grid h-14 w-14 place-items-center rounded-[18px] text-white shadow-md ${solid[t.color]}`}><Icon name={t.icon} size={26} /></span>
+              <span className="text-[13px] font-bold">{t.title}</span>
+              {t.badge > 0 && <span className="absolute right-2 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-accent-500 px-1 text-[11px] font-bold text-white ring-2 ring-white dark:ring-navy-900">{t.badge}</span>}
+              {t.locked && <Icon name="Lock" size={12} className="absolute left-3 top-1 text-slate-400" />}
+            </Link>
+          ))}
         </div>
+        {/* היום: מה הכי חשוב עכשיו, בשורה אחת לכל דבר */}
+        <section className="mt-4 overflow-hidden rounded-3xl bg-white shadow-card ring-1 ring-slate-900/5 dark:bg-navy-900 dark:ring-white/5">
+          <div className="px-4 pt-3 text-xs font-bold text-slate-400">מה קורה</div>
+          <TodayRow to="/events" icon="CalendarDays" color="violet" title={next ? next.title : 'אין אירועים קרובים'} sub={next ? `${relDay(next.date)}${next.time ? ` · ${next.time}` : ''}` : ''} />
+          <TodayRow to="/rooms" icon="DoorOpen" color="teal" title={mine ? mine.room : 'אין לך הזמנת חדר'} sub={mine ? `${daysAway(mine) === 0 ? 'היום' : daysAway(mine) === 1 ? 'מחר' : `יום ${DAYS[mine.date ? parseISO(mine.date).getDay() : mine.day]}`} · \u200E${mine.from}–${mine.to}` : 'אפשר להזמין חדר פנוי'} />
+          <TodayRow to="/speaker" icon="Speaker" color="green" title={`רמקול: ${sp.label}`} dot={sp.color} last />
+        </section>
+
       </main>
     </div>
+  )
+}
+
+function TodayRow({ to, icon, color, title, sub, dot, last }) {
+  return (
+    <Link to={to} className={`flex items-center gap-3 px-4 py-3 active:bg-slate-50 dark:active:bg-white/5 ${last ? '' : 'border-b border-slate-100 dark:border-white/5'}`}>
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone[color]}`}><Icon name={icon} size={18} /></span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5 truncate font-bold">{dot && <span className={`h-2 w-2 shrink-0 rounded-full ${{ green: 'bg-emerald-500', rose: 'bg-rose-500', amber: 'bg-amber-400' }[dot]}`} />}{title}</span>
+        {sub && <span className="block truncate text-xs text-slate-500 dark:text-slate-400">{sub}</span>}
+      </span>
+      <Icon name="ChevronLeft" size={18} className="shrink-0 text-slate-300" />
+    </Link>
   )
 }

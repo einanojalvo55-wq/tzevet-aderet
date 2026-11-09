@@ -30,6 +30,8 @@ jobs:
         run: |
           cd dist
           touch .nojekyll
+          # Vercel לא ינסה לבנות את הענף הזה (אחרת נשלחים מיילים על כישלון)
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
           git init -q -b gh-pages
           git add -A
           git -c user.name="github-actions" -c user.email="actions@github.com" commit -qm "Publish ${GITHUB_SHA::7}"

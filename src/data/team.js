@@ -8,15 +8,20 @@ export const waNumber = (p) => (p || '').replace(/\D/g, '').replace(/^0/, '972')
 export const waLink = (phone, text) => `https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text)}`
 
 // כל אנשי הצוות שנרשמו. מי שנרשם פעמיים (למשל אחרי התקנה מחדש) מופיע פעם אחת.
+// טלפון אחיד: +972-58... → 058...
+export const normPhone = (p) => { const d = (p || '').replace(/\D/g, ''); return d.startsWith('972') ? '0' + d.slice(3) : d }
+
 export function dedupe(users) {
-  const best = new Map()
+  // מאחדים לפי טלפון או לפי שם מלא (לא מוחקים כלום בשרת, רק מציגים פעם אחת)
+  const groups = []
   for (const u of users) {
     if (!u.firstName) continue
-    const key = (u.phone || '').replace(/\D/g, '') || `${u.firstName} ${u.lastName}`
-    const cur = best.get(key)
-    if (!cur || (u.updatedAt || 0) > (cur.updatedAt || 0)) best.set(key, u)
+    const ph = normPhone(u.phone), nm = `${u.firstName} ${u.lastName || ''}`.trim()
+    const g = groups.find((x) => (ph && x.phones.has(ph)) || x.names.has(nm))
+    if (g) { g.list.push(u); if (ph) g.phones.add(ph); g.names.add(nm) } else groups.push({ phones: new Set(ph ? [ph] : []), names: new Set([nm]), list: [u] })
   }
-  return [...best.values()]
+  // מכל קבוצה מציגים את הרשומה העדכנית ביותר
+  return groups.map((g) => g.list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0])
 }
 
 export function useTeam(profile) {
