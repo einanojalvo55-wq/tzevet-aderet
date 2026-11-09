@@ -13,6 +13,7 @@ import { newId } from '../data/store'
 // שני סוגי שיבוצים:
 // קבוע: { day: 0-6 } חוזר כל שבוע (המנהל קובע)
 // חד-פעמי: { date: 'YYYY-MM-DD' } כל אחד יכול להזמין חדר פנוי
+const ALL_TRIBES = 'כל השבטים'
 const dayOf = (iso) => parseISO(iso).getDay()
 const isOn = (b, iso) => (b.date ? b.date === iso : b.day === dayOf(iso))
 const toISO = (x) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`
@@ -55,7 +56,7 @@ export default function Rooms({ profile }) {
   const [roomFilter, setRoomFilter] = useState('all')
   const [editing, setEditing] = useState(null)
   const me = fullName(profile)
-  const isMine = (b) => b.by === me || b.who === profile.tribe || (b.who || '').split(/[-+ ]+/).includes(profile.tribe)
+  const isMine = (b) => b.by === me || b.who === profile.tribe || b.who === ALL_TRIBES || (b.who || '').split(/[-+ ]+/).includes(profile.tribe)
   const canEdit = (b) => isAdmin || (b.by && b.by === me)
   const mine = list.filter(isMine).filter((b) => b.day != null || b.date >= today)
     .sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || (a.day ?? 9) - (b.day ?? 9) || toMin(a.from) - toMin(b.from))
@@ -68,7 +69,8 @@ export default function Rooms({ profile }) {
     const saved = isNew ? { ...clean, id: newId() } : clean
     setList((l) => isNew ? [...l, saved] : l.map((x) => x.id === b.id ? saved : x))
     const when = b.date ? dayLabel(b.date) : `כל יום ${DAYS[b.day]}`
-    if (tribes.includes(b.who)) notify({ text: `שיבוץ חדר: ${b.who} ב${b.room}, ${when} ‎${b.from}–${b.to}‎`, kind: 'room', to: `tribe:${b.who}`, link: '/rooms' })
+    if (b.who === ALL_TRIBES) notify({ text: `שיבוץ חדר לכל השבטים: ${b.room}, ${b.date ? dayLabel(b.date) : `כל יום ${DAYS[b.day]}`} \u200E${b.from}–${b.to}\u200E`, kind: 'room', to: 'all', link: '/rooms' })
+    else if (tribes.includes(b.who)) notify({ text: `שיבוץ חדר: ${b.who} ב${b.room}, ${when} ‎${b.from}–${b.to}‎`, kind: 'room', to: `tribe:${b.who}`, link: '/rooms' })
     setEditing(null)
   }
   const remove = (b) => { if (confirm('לבטל את ההזמנה?')) { setList((l) => l.filter((x) => x.id !== b.id)); setEditing(null) } }
@@ -156,13 +158,14 @@ export default function Rooms({ profile }) {
 
 function BookingForm({ initial, list, rooms, tribes, profile, isAdmin, onClose, onSave, onDelete }) {
   const me = fullName(profile)
-  const [b, setB] = useState({ room: rooms[0], from: '16:00', to: '17:30', who: profile.tribe, by: me, date: todayISO(), ...initial })
+  const [b, setB] = useState({ room: rooms[0], from: '16:00', to: '17:30', who: me, by: me, date: todayISO(), ...initial })
   const weekly = b.day != null
   const clash = findClash(list, b)
   const badTime = toMin(b.to) <= toMin(b.from)
   const pastDate = !weekly && b.date < todayISO()
   const setWeekly = (on) => setB(on ? { ...b, day: b.date ? dayOf(b.date) : 6, date: undefined } : { ...b, day: undefined, date: todayISO() })
-  const whoOptions = [...new Set([profile.tribe, me, ...tribes])]
+  // כל אחד יכול להזמין לעצמו, לכל שבט, או לכל השבטים יחד
+  const whoOptions = [...new Set([me, ...tribes, ALL_TRIBES])]
 
   return (
     <Sheet title={initial.id ? 'עריכת הזמנה' : 'הזמנת חדר'} onClose={onClose}>
@@ -181,7 +184,7 @@ function BookingForm({ initial, list, rooms, tribes, profile, isAdmin, onClose, 
           <label><span className="mb-1 block text-sm font-semibold">משעה</span><input type="time" className={field} value={b.from} onChange={(e) => setB({ ...b, from: e.target.value })} /></label>
           <label><span className="mb-1 block text-sm font-semibold">עד שעה</span><input type="time" className={field} value={b.to} onChange={(e) => setB({ ...b, to: e.target.value })} /></label>
         </div>
-        <div><div className="mb-1.5 text-sm font-semibold">בשביל מי</div><Chips options={isAdmin ? whoOptions : [profile.tribe, me]} value={b.who} onChange={(who) => setB({ ...b, who })} small /></div>
+        <div><div className="mb-1.5 text-sm font-semibold">בשביל מי</div><Chips options={whoOptions} value={b.who} onChange={(who) => setB({ ...b, who })} small /></div>
         {clash && <Taken what="החדר תפוס בשעה הזאת" who={clash.who} phone={clash.who === clash.by ? clash.phone : ''} />}
         {clash && <p className="-mt-2 text-sm text-slate-500">{clash.room}: <span dir="ltr">{clash.from}–{clash.to}</span>{clash.day != null ? ` · קבוע כל יום ${DAYS[clash.day]}` : ''}</p>}
         {badTime && <p className="text-sm text-rose-600">שעת הסיום צריכה להיות אחרי שעת ההתחלה</p>}
